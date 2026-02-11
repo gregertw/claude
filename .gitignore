@@ -7,5 +7,6 @@
 !agents/
 !agents/**
 
-# Keep this file
+# Keep these files
 !.gitignore
+!README.md
