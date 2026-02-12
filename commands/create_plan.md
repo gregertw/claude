@@ -11,7 +11,13 @@ Take a research document, interact with the user to resolve decisions, and produ
 - If no research doc exists, suggest running `/research_codebase` first
 - Read all files referenced in the research document
 
-### 2. Resolve open decisions
+### 2. Ask for additional context
+
+- Ask the user if there are additional instructions or context that should be taken into the plan
+- Review the new information against the loaded context and identify any conflicts, new decisions needed, or open questions
+- Do additional research in code base or search the Internet if needed
+
+### 3. Resolve open decisions
 
 Walk through each item in the research doc's "Decisions Needed" section:
 - Present the options with their trade-offs
@@ -21,7 +27,7 @@ Walk through each item in the research doc's "Decisions Needed" section:
 
 Do NOT proceed to planning until all decisions are resolved.
 
-### 3. Design the implementation approach
+### 4. Design the implementation approach
 
 Present a phased outline to the user BEFORE writing details:
 
@@ -36,7 +42,7 @@ Does this phasing make sense?
 
 Get feedback and adjust before writing the full plan.
 
-### 4. Evaluate the plan
+### 5. Evaluate the plan
 
 Spawn an agent team to evaluate the plan from four perspectives in parallel:
 
@@ -49,7 +55,7 @@ Each evaluator should review the proposed changes against the actual codebase an
 
 Incorporate feedback into the plan. Present any significant concerns to the user.
 
-### 5. Write the plan
+### 6. Write the plan
 
 Save to `thoughts/plans/YYYY-MM-DD-description.md`:
 
@@ -120,7 +126,7 @@ Save to `thoughts/plans/YYYY-MM-DD-description.md`:
 [Key feedback and how it was addressed]
 ```
 
-### 6. Present for approval
+### 7. Present for approval
 
 Show the user the plan location and a summary. Ask if they want to adjust anything before implementation.
 
