@@ -132,6 +132,8 @@ Show the user the plan location and a summary. Ask if they want to adjust anythi
 
 ## Guidelines
 
+- **Do not switch into plan mode** - we want all plans and documents in the repository
+- **Do not make any code changes** - this step is just to plan out what to do
 - **Each phase must be independently testable** - don't create phases that leave things broken
 - **Include specific file paths** for all planned changes
 - **Every phase needs new tests** for new functionality AND passing existing tests

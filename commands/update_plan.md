@@ -13,6 +13,7 @@ $ARGUMENTS - Optional: path to the plan file to update, or new context/instructi
 - If a plan path was provided as argument, read it fully
 - If not, list recent files in `thoughts/plans/` and ask which to update
 - Read the full plan file and its referenced research document (if any)
+- This is to change a plan before it's implemented. If the plan shows implementation has started, stop and tell the user that /iterate_plan should be used to work on the implementation.
 
 ### 2. Gather new context
 
