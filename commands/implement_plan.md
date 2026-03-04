@@ -57,6 +57,7 @@ Should I continue with this adjustment?
 
 After completing each phase:
 - Verify ALL tests still pass (not just the phase's tests)
+- Treat also unrelated failing tests as failures that need to be investigated and probably fixed
 - Update the plan with any new insights that affect upcoming phases
 - Proceed to the next phase
 

@@ -94,6 +94,7 @@ Show the user a concise summary with the document path and highlight the key dec
 
 ## Guidelines
 
+- **Focus on research and identifying key decisions** - do not make recommendations or ask the user to make decisions
 - **Be factual** - describe what IS, not what SHOULD be
 - **Include specific file paths and line numbers** for all claims
 - **Always include web research** for external context, best practices, and alternatives

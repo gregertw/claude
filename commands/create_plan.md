@@ -27,7 +27,20 @@ Walk through each item in the research doc's "Decisions Needed" section:
 
 Do NOT proceed to planning until all decisions are resolved.
 
-### 4. Design the implementation approach
+### 4. Evaluate the plan
+
+Spawn an agent team to evaluate the plan with concluded decisions from four perspectives in parallel:
+
+- **Architecture**: Does this fit existing patterns in the codebase? Integration risks? Dependencies?
+- **Security**: Authentication, authorization, injection, or data exposure risks?
+- **Scalability**: Performance under load? Database query patterns? Memory usage?
+- **Usability**: Is the API/UI intuitive? Error messages helpful? Migration path clear?
+
+Each evaluator should review the proposed changes against the actual codebase and return specific concerns with `file:line` references.
+
+Incorporate feedback into the plan. Present any significant concerns to the user and request decisions.
+
+### 5. Design the implementation approach
 
 Present a phased outline to the user BEFORE writing details:
 
@@ -41,19 +54,6 @@ Does this phasing make sense?
 ```
 
 Get feedback and adjust before writing the full plan.
-
-### 5. Evaluate the plan
-
-Spawn an agent team to evaluate the plan from four perspectives in parallel:
-
-- **Architecture**: Does this fit existing patterns in the codebase? Integration risks? Dependencies?
-- **Security**: Authentication, authorization, injection, or data exposure risks?
-- **Scalability**: Performance under load? Database query patterns? Memory usage?
-- **Usability**: Is the API/UI intuitive? Error messages helpful? Migration path clear?
-
-Each evaluator should review the proposed changes against the actual codebase and return specific concerns with `file:line` references.
-
-Incorporate feedback into the plan. Present any significant concerns to the user.
 
 ### 6. Write the plan
 
