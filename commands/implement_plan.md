@@ -2,6 +2,37 @@
 
 Execute an implementation plan phase by phase, ensuring tests pass at each step and keeping the plan document updated with progress and learnings.
 
+## Plan status and where things go
+
+The plan's YAML frontmatter carries its status, from a closed four-value
+vocabulary (`proposed` | `active` | `done` | `superseded`). This command owns two
+transitions:
+
+- **On starting work:** set `status: active` in the frontmatter. `active` means
+  *being implemented right now* — it is what
+  `grep -l "^status: active" thoughts/plans/*.md` reports as in flight.
+- **When all phases are complete:** set `status: done`. After
+  `/verify_implementation` runs, the plan also gets
+  `verified: thoughts/verifications/YYYY-MM-DD-slug.md`.
+
+Two rules that matter more than they look:
+
+- **Never leave a plan `active` once you stop working on it.** A plan whose
+  remaining phases were abandoned is `done`, not `active` — write the unfinished
+  remainder to `thoughts/todo/<slug>.md` (undated, living, deleted when the work
+  lands) and let the plan close. Stalled `active` plans are what make the
+  in-flight query worthless.
+- **Never move the plan file**, and never create a `completed/` directory. A
+  directory is a *kind* of document, never a *status*. The finished plan stays in
+  `thoughts/plans/` because the verification links to it by path.
+
+Things discovered while implementing:
+
+- Real but out of scope now → `thoughts/todo/<slug>.md`
+- Durable knowledge about how the system works → `thoughts/reference/<slug>.md`,
+  updated in place from then on
+- Neither is dated — both are living documents.
+
 ## Process
 
 ### 1. Load the plan
@@ -16,6 +47,8 @@ Execute an implementation plan phase by phase, ensuring tests pass at each step 
 - Look for phases marked with `Implementation Status: Complete` - skip those
 - Start from the first phase marked `Not Started` or `In Progress`
 - If resuming a partially completed phase, verify what's already done before continuing
+- Set the plan's frontmatter to `status: active` before touching code (add the
+  frontmatter block if an older plan doesn't have one)
 
 ### 3. Implement each phase
 
@@ -24,7 +57,9 @@ For each phase:
 **Before coding:**
 - Read all files that will be modified
 - Understand the current state of the code
-- Update the plan: change status to `In Progress`
+- Update the plan: change that phase's `Implementation Status:` to `In Progress`
+  (the per-phase marker — distinct from the plan-level frontmatter `status:`,
+  which is `active` for the whole run)
 
 **Implement the changes:**
 - Make the code changes specified in the plan
@@ -64,7 +99,7 @@ After completing each phase:
 ### 5. After all phases complete
 
 - Run the full verification suite one final time
-- Update the plan's top-level status to `Implemented`
+- Set the plan's frontmatter to `status: done` (leave the file where it is)
 - Add a summary section at the bottom:
 
 ```markdown
@@ -92,3 +127,5 @@ After completing each phase:
 - **Run all checks** (e.g. ruff, pyright, pytest or similar) after each phase, not just tests
 - **Read files fully** before modifying them
 - **Commit-worthy phases** - each completed phase should be in a state worthy of committing
+- **Park deferred work in `thoughts/todo/`, don't leave it implied by an
+  unfinished phase** - the plan closes, the todo survives

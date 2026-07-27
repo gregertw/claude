@@ -8,6 +8,22 @@ Use this command when you've implemented a plan (via `/implement_plan`) and veri
 
 $ARGUMENTS - Optional: path to the plan file, or description of what to iterate on
 
+## Plan status while iterating
+
+The plan's YAML frontmatter carries its status, from a closed four-value
+vocabulary (`proposed` | `active` | `done` | `superseded`).
+
+- **A plan being iterated on stays `done`** (with its `verified:` link intact).
+  Post-verification refinements are recorded in the plan's body, not by reopening
+  its status — flipping it back to `active` would misreport what's in flight.
+- **If iteration turns into substantial new work**, that's a new plan via
+  `/create_plan`, not an ever-growing Post-Verification section.
+- **Never move the plan file** and never create a `completed/` directory — a
+  directory is a *kind* of document, never a *status*. The verification links to
+  the plan by path; a move rots that link silently.
+- **Findings you're not fixing now** go to `thoughts/todo/<slug>.md` (undated,
+  living, deleted when the work lands), not into a phase left open.
+
 ## Process
 
 ### 1. Load context

@@ -2,6 +2,32 @@
 
 Investigate the codebase deeply and research the web to produce a factual document useful for decision-making.
 
+## Where documents live
+
+Five directories under `thoughts/`, and **a directory is a *kind* of document,
+never a *status***:
+
+| Directory | Holds | Dated? |
+| --- | --- | --- |
+| `thoughts/research/` | What we found out — investigation, measurement, analysis | yes |
+| `thoughts/plans/` | What we intend to do — phased implementation plans | yes |
+| `thoughts/verifications/` | Evidence a plan actually landed | yes |
+| `thoughts/reference/` | Durable internal knowledge — protocol flows, runbooks, indexes | no |
+| `thoughts/todo/` | Known work not yet scheduled | no |
+
+Research goes in `thoughts/research/YYYY-MM-DD-slug.md`. The **date is the
+status**: a research document is a snapshot, true as of the day it was written,
+and it is not edited afterwards except to correct an error. If you find yourself
+wanting to keep a document current, it belongs in `thoughts/reference/` (living,
+undated) instead — that includes durable findings that outlive the question that
+prompted them.
+
+**Pick the slug carefully: the plan and the verification will reuse it.** Same
+slug across the three directories is how a piece of work is followed end to end.
+
+Research documents carry **no `status:` frontmatter** — only plans do. Don't
+invent one.
+
 ## Process
 
 ### 1. Understand the question
@@ -36,13 +62,12 @@ Wait for ALL sub-agents to complete before proceeding.
 
 ### 5. Write the research document
 
-Save to `thoughts/research/YYYY-MM-DD-description.md`:
+Save to `thoughts/research/YYYY-MM-DD-slug.md`:
 
 ```markdown
 # Research: [Topic]
 
 **Date:** YYYY-MM-DD
-**Status:** Complete
 **Branch:** [current branch]
 **Commit:** [current short hash]
 

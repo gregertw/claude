@@ -2,6 +2,61 @@
 
 Take a research document, interact with the user to resolve decisions, and produce an actionable implementation plan. Evaluate the plan from multiple perspectives before finalizing.
 
+## Where documents live
+
+Five directories under `thoughts/`, and **a directory is a *kind* of document,
+never a *status***:
+
+| Directory | Holds | Dated? |
+| --- | --- | --- |
+| `thoughts/research/` | What we found out — investigation, measurement, analysis | yes |
+| `thoughts/plans/` | What we intend to do — phased implementation plans | yes |
+| `thoughts/verifications/` | Evidence a plan actually landed | yes |
+| `thoughts/reference/` | Durable internal knowledge — protocol flows, runbooks, indexes | no |
+| `thoughts/todo/` | Known work not yet scheduled | no |
+
+- **Dated** (`YYYY-MM-DD-slug.md`) means *snapshot*: true as of that date, not
+  edited afterwards except to correct an error.
+- **Undated** (`slug.md`) means *living*: edited in place, deleted when it stops
+  being true.
+- **Reuse the slug** across research → plan → verification. Same slug = same
+  thread of work; the dates differ, the slug shouldn't.
+- **Never move a document because its status changed**, and never create a
+  `completed/` directory. A finished plan stays in `thoughts/plans/` — moving it
+  rots every link that verifications and research wrote to it.
+
+## Plan status: frontmatter, closed vocabulary
+
+Every plan opens with YAML frontmatter. `status` is required and must be one of
+four values; nothing else is a valid status:
+
+```yaml
+---
+status: proposed | active | done | superseded
+verified: thoughts/verifications/YYYY-MM-DD-slug.md   # when status: done
+superseded_by: thoughts/plans/YYYY-MM-DD-slug.md      # when status: superseded
+---
+```
+
+- **proposed** — written, not agreed. Nobody is working on it.
+- **active** — being implemented right now.
+- **done** — implemented. Link the verification.
+- **superseded** — overtaken. Link the replacement; keep the file, because
+  knowing what we decided *not* to do is worth as much as knowing what we did.
+
+`grep -l "^status: active" thoughts/plans/*.md` has to answer "what is in
+flight" truthfully — that is the whole point of putting status in frontmatter.
+So a new plan is **`proposed`**, even when the user has agreed to it in
+principle: it becomes `active` only when implementation actually starts.
+
+Only plans carry `status:`. Research and verification documents don't — they are
+dated snapshots and their date is their status.
+
+Note the two levels: the frontmatter `status:` describes the **whole plan**, while
+each phase carries its own `Implementation Status:` line (`Not Started` /
+`In Progress` / `Complete`) in the body. They are different fields; don't collapse
+them.
+
 ## Process
 
 ### 1. Load context
@@ -57,14 +112,18 @@ Get feedback and adjust before writing the full plan.
 
 ### 6. Write the plan
 
-Save to `thoughts/plans/YYYY-MM-DD-description.md`:
+Save to `thoughts/plans/YYYY-MM-DD-slug.md`, reusing the research document's
+slug:
 
 ```markdown
+---
+status: proposed
+---
+
 # Implementation Plan: [Feature Name]
 
 **Date:** YYYY-MM-DD
-**Status:** Ready for Implementation
-**Research:** thoughts/research/YYYY-MM-DD-description.md
+**Research:** thoughts/research/YYYY-MM-DD-slug.md
 **Branch:** [current branch]
 
 ## Overview
@@ -132,6 +191,11 @@ Show the user the plan location and a summary. Ask if they want to adjust anythi
 
 ## Guidelines
 
+- **Always write the `status:` frontmatter block** - a plan without it is
+  invisible to the greps the convention exists to serve
+- **Don't restate the frontmatter in a prose status line** - add one only when
+  there is detail the four values can't carry ("Phases 1-3 done, 4 blocked on an
+  upstream release"), and keep it consistent with the frontmatter, which always wins
 - **Do not switch into plan mode** - we want all plans and documents in the repository
 - **Do not make any code changes** - this step is just to plan out what to do
 - **Each phase must be independently testable** - don't create phases that leave things broken

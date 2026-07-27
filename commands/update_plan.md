@@ -6,6 +6,24 @@ Take new context, facts, or data and update an existing implementation plan that
 
 $ARGUMENTS - Optional: path to the plan file to update, or new context/instructions
 
+## Plan status while updating
+
+The plan's YAML frontmatter carries its status, from a closed four-value
+vocabulary (`proposed` | `active` | `done` | `superseded`). This command works on
+plans that haven't been implemented, so:
+
+- **Normally the status doesn't change** — a `proposed` plan being revised is
+  still `proposed`. Record what changed in the Update Log, not in the status.
+- **If the update is so large it replaces the plan rather than revising it**,
+  write a new plan and set the old one to `status: superseded` with
+  `superseded_by: thoughts/plans/YYYY-MM-DD-slug.md`. Keep the superseded file:
+  knowing what we decided *not* to do is worth as much as knowing what we did.
+- **Never move the plan file** and never create a `completed/` directory — a
+  directory is a *kind* of document, never a *status*. Moving a plan rots the
+  links that research and verifications wrote to it.
+
+Only plans carry `status:`. Research and verification documents don't.
+
 ## Process
 
 ### 1. Identify the plan to update
@@ -79,8 +97,12 @@ Only evaluate phases with significant changes - skip this for minor updates.
 
 Modify the existing plan file in place. Preserve the original structure and:
 
-- Update the **Status** field if appropriate (e.g., "Updated YYYY-MM-DD" or keep "Ready for Implementation")
-- Add an **Update Log** section at the top (after the header metadata) if one doesn't exist:
+- Leave the frontmatter `status:` alone unless the plan is being replaced
+  wholesale (then: `superseded` + `superseded_by:`, per above). If the plan
+  predates the convention and has no frontmatter, add it — `status: proposed` for
+  a plan that hasn't been started
+- Add an **Update Log** section at the top (after the frontmatter and header
+  metadata) if one doesn't exist:
 
 ```markdown
 ## Update Log
