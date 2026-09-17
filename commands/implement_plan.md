@@ -28,12 +28,29 @@ Two rules that matter more than they look:
 
 Things discovered while implementing:
 
-- Real but out of scope now → `thoughts/todo/<slug>.md`
+- Real but out of scope now → `thoughts/todo/<slug>.md`, following any rule
+  the contract's `### Thoughts` states for that directory (an index to update,
+  a naming scheme)
 - Durable knowledge about how the system works → `thoughts/reference/<slug>.md`,
   updated in place from then on
 - Neither is dated — both are living documents.
 
 ## Process
+
+### 0. Project conventions
+
+Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
+if it exists, `.claude/workflow/implement_plan.md`. They override the defaults in this
+command: the checks to run (fast and full tiers, and the preconditions and
+warnings listed with them, which are instructions), how the app starts, the CI
+policy, tool pins, any rule under `### Thoughts` about writing there, and any
+rule the project adds. If neither exists, proceed on this command's own
+defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
+up, and do not invent project facts (check commands, hosts, credentials): ask
+for them or leave them as open items. When running autonomously with no user
+to ask, do not block:
+derive what you can from the documents, mark every such decision "deduced,
+not confirmed", and list it under the command's undecided or deferred section.
 
 ### 1. Load the plan
 
@@ -64,6 +81,12 @@ For each phase:
 **Implement the changes:**
 - Make the code changes specified in the plan
 - Write new tests as specified
+- If a phase fails for a non-obvious reason (unexpected test failure, behaviour
+  that contradicts the plan's assumptions), do not patch around it. Find the
+  root cause first (trace the path, check `git log` on the affected files,
+  confirm the cause with a log line or assertion), make the minimal fix, and
+  add a regression test that fails without it. Note the cause under the phase.
+  If three hypotheses fail, stop and tell the user
 - If the plan doesn't match reality (code has changed, approach won't work), STOP:
 
 ```
@@ -76,7 +99,7 @@ Should I continue with this adjustment?
 ```
 
 **After coding:**
-- Run verification commands for the phase as specified in CLAUDE.md. Example verifications for a python repository:
+- Run the contract's `### Checks` **fast tier** (or the single tier when there is no split), honouring its preconditions. Example for a python repository:
   ```
   poetry run ruff check . --fix
   poetry run pyright
@@ -91,14 +114,14 @@ Should I continue with this adjustment?
 ### 4. Between phases
 
 After completing each phase:
-- Verify ALL tests still pass (not just the phase's tests)
+- Verify ALL tests still pass (not just the phase's tests); before the phase's commit, that means the **full tier**
 - Treat also unrelated failing tests as failures that need to be investigated and probably fixed
 - Update the plan with any new insights that affect upcoming phases
 - Proceed to the next phase
 
 ### 5. After all phases complete
 
-- Run the full verification suite one final time
+- Run the contract's **full tier** one final time
 - Set the plan's frontmatter to `status: done` (leave the file where it is)
 - Add a summary section at the bottom:
 

@@ -26,6 +26,21 @@ Only plans carry `status:`. Research and verification documents don't.
 
 ## Process
 
+### 0. Project conventions
+
+Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
+if it exists, `.claude/workflow/update_plan.md`. They override the defaults in this
+command: the checks to run (fast and full tiers, and the preconditions and
+warnings listed with them, which are instructions), how the app starts, the CI
+policy, tool pins, any rule under `### Thoughts` about writing there, and any
+rule the project adds. If neither exists, proceed on this command's own
+defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
+up, and do not invent project facts (check commands, hosts, credentials): ask
+for them or leave them as open items. When running autonomously with no user
+to ask, do not block:
+derive what you can from the documents, mark every such decision "deduced,
+not confirmed", and list it under the command's undecided or deferred section.
+
 ### 1. Identify the plan to update
 
 - If a plan path was provided as argument, read it fully
@@ -84,12 +99,24 @@ Do NOT proceed to updating the plan until all new decisions are resolved.
 
 ### 5. Re-evaluate affected phases
 
-For phases that need significant changes, spawn agents to evaluate from the same four perspectives as `/create_plan`:
+For phases that need significant changes, run the same evaluation as
+`/create_plan` step 6, scoped to the changed phases:
 
-- **Architecture**: Do changes fit existing patterns? New integration risks?
-- **Security**: New authentication, authorization, or data exposure concerns?
-- **Scalability**: Performance implications of changes?
-- **Usability**: API/UI impact? Migration path still clear?
+- First, yourself: re-check the minimum change set (does the change rebuild
+  something that exists?), add a Failure Scenario for each new codepath, and
+  give every new "What We're NOT Doing" item a one-line reason.
+- Then spawn the five evaluators in parallel:
+  - **Architecture**: Do changes fit existing patterns? New integration risks?
+  - **Security**: New authentication, authorization, or data exposure concerns?
+  - **Scalability**: Performance implications of changes?
+  - **Usability**: API/UI impact? Migration path still clear?
+  - **Tests and code quality**: Are the new codepaths traced and tested? Regression test if a defect is being fixed? Duplication, missing error and edge handling?
+- Evidence rule: a concern must quote the motivating line as `file:line`; one that cannot is a note under "Unverified notes".
+- Finally, the **outside-voice** agent (`~/.claude/agents/outside-voice.md`, the second-opinion capability) given only the plan path and the evaluators' findings: what did the review miss?
+
+Findings that change scope, phasing, or a recorded decision go to the user;
+mechanical findings fold in. A decision the user explicitly defers is recorded
+under "Decisions Deferred", never silently defaulted.
 
 Only evaluate phases with significant changes - skip this for minor updates.
 
@@ -117,7 +144,9 @@ Modify the existing plan file in place. Preserve the original structure and:
   - Mark changed decisions with "[Updated YYYY-MM-DD]"
   - Add new decisions
 
-- Update **What We're NOT Doing** if scope changed
+- Update **What We're NOT Doing** if scope changed, with a one-line reason per item
+
+- Update **Decisions Deferred** and **What Already Exists** if the change touched them
 
 - Update affected phases:
   - Modify existing phase content as needed
@@ -125,7 +154,8 @@ Modify the existing plan file in place. Preserve the original structure and:
   - If a phase needs to be removed, move it to a "Removed Phases" section with rationale rather than deleting it
   - Update **Implementation Status** on each phase to reflect current state
 
-- Update **Evaluation Notes** with any new evaluation feedback
+- Update **Evaluation Notes** with any new evaluation feedback, including the
+  "Tests and code quality", "Outside voice", and "Unverified notes" subsections
 
 ### 7. Present changes
 
