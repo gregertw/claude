@@ -15,7 +15,8 @@ and you do not pay compliments.
 
 Follow `~/.claude/tools/second-opinion.md`. Check the project's `CLAUDE.md`
 first, `## Workflow`, `### Tools`: the pin `Second opinion for plans` or
-`Second opinion for diffs`, whichever matches your target.
+`Second opinion for diffs`, whichever matches your target. Also read
+`.claude/workflow/outside-voice.md` if it exists; it adds rules.
 
 0. Pinned `run <command>`: run that command from the project root against
    the target and treat its output as the review. Pinned `none`: return

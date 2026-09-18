@@ -1,12 +1,14 @@
 # Claude Configs
 
-A workflow for building software with Claude Code, as a set of slash commands,
-sub-agents, and conventions. The thinking behind each piece of work is written
-down next to the code, step by step, so a reviewer reads the thought process
-and not only the diff. It is simple by purpose: markdown files, no plugin, no
-dependency on any skill suite.
+> By [Greger Teigre Wedel](https://stuff.greger.io) inspired by works from https://> github.com/humanlayer/humanlayer and https://github.com/garrytan/gstack.
 
-By [Greger Teigre Wedel](https://stuff.greger.io) inspired by works from https://github.com/humanlayer/humanlayer.
+## Why another Claude workflow?
+
+There are very elaborate workflows and then there are workflows that rely on services outside Claude. There are very agentic workflows with lots of autonomy. And then there are workflows that make you spend tokens like crazy.
+
+And there is this workflow. It is built on principles of good product craft without being too opinionated. It stores all parts of the workflow in documents in the git repo so humans can inspect, correct, and interact with agents and each other. It builds on Claude's capabilities and can use your installed tools and preferences through simple configuration. 
+
+You guide the workflow through slash commands and there are a few sub-agents and tools that support each workflow step. The output ends in the thoughts/ directory in your repo (yes, it makes sense to check it in). You can then review and inspect, before triggering the next step. More details on the workflow can be found below.
 
 ## Install
 
@@ -104,7 +106,8 @@ thoughts/plans/2026-09-20-offline-sync.md         what we will do, in phases
 thoughts/verifications/2026-09-28-offline-sync.md what actually landed
 ```
 
-1. **Feature definition: `/plan_feature`.** Happens before anyone looks at the
+1. **Feature definition: `/plan_feature`.** It's not mandatory, you can go sraight
+   to `/research_codebase`. But this step happens before anyone looks at the
    code, on purpose. Starting in the codebase anchors the thinking on what
    exists; this step anchors it on the users. It is a conversation, one topic
    at a time: who has the problem and what it costs them, a premise check (is
@@ -113,12 +116,12 @@ thoughts/verifications/2026-09-28-offline-sync.md what actually landed
    version that still delivers, the user experience as a narrative, success
    measures with how each is observed, two or three hypotheses with one
    chosen, what is out of scope and why, and the open questions that research
-   must answer. It mints the slug.
-2. **Research: `/research_codebase`.** Takes the feature document, derives
-   research questions from the hypothesis and open questions, and fans them
-   out to sub-agents that read the code and the web. Given a plain question
-   instead of a feature document, it investigates that. The output ends with
-   the decisions that need a human before planning can start.
+   must answer. It mints the slug used in document naming.
+2. **Research: `/research_codebase`.** Takes the feature document or your
+   question, derives research questions from the hypothesis and open questions,
+   and fans them out to sub-agents that read the code and the web. Given a plain
+   question instead of a feature document, it investigates that. The output ends
+   with the decisions that need a human before planning can start.
 3. **Planning: `/create_plan`, then `/update_plan`.** Resolves the decisions
    with the user, agrees the phasing, writes a draft, and then evaluates the
    draft from six angles: architecture, security, scalability, usability,
@@ -187,8 +190,9 @@ suite or plugin. Where an installed tool does a job better, a headless browser
 for QA or a second model for review, a command names a *capability* and
 `tools/<capability>.md` says which providers supply it, how to detect them,
 and what to do when none is present. First available provider wins; a
-project's `CLAUDE.md` can pin one under `### Tools` in its `## Workflow` section; absence is
-always a documented degradation, never a silent skip. See `tools/README.md`.
+project's `CLAUDE.md` can pin one under `### Tools` in its `## Workflow` section;
+absence is always a documented degradation, never a silent skip. See
+`tools/README.md`.
 
 ## Customizing the workflow in a project
 
