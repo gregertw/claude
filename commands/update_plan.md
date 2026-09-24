@@ -95,7 +95,7 @@ If the update introduces new open questions or invalidates previous decisions:
 - Ask the user to choose
 - Record the decision and rationale
 
-Do NOT proceed to updating the plan until all new decisions are resolved.
+Move on to updating the plan once every new decision is resolved or explicitly deferred by the user (recorded under Decisions Deferred).
 
 ### 5. Re-evaluate affected phases
 

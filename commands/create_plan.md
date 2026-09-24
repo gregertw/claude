@@ -98,7 +98,7 @@ Walk through each item in the research doc's "Decisions Needed" section:
 - Record the decision and rationale
 - If a decision triggers new questions, research them before continuing
 
-Do NOT proceed to planning until all decisions are resolved.
+Move on to planning once every decision is resolved or explicitly deferred by the user (recorded under Decisions Deferred).
 
 ### 4. Design the implementation approach
 
