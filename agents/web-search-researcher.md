@@ -105,8 +105,6 @@ Structure your findings as:
 
 ## Search Efficiency
 
-- Start with 2-3 well-crafted searches before fetching content
-- Fetch only the most promising 3-5 pages initially
 - If initial results are insufficient, refine search terms and try again
 - Use search operators effectively: quotes for exact phrases, minus for exclusions, site: for specific domains
 - Consider searching in different forms: tutorials, documentation, Q&A sites, and discussion forums
