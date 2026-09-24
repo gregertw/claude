@@ -52,7 +52,7 @@ control back. Or import your own session: `$B cookie-import-browser chrome --dom
 running it elsewhere starts a second daemon. Its first run in a project
 creates a `.gstack/` directory and adds it to the project's `.gitignore`.
 Refs from `snapshot` go stale on navigation, so snapshot again after each
-page load. Never type credentials yourself; use handoff or cookie import.
+page load. Type credentials only when `### Test account` permits it (see below); otherwise use handoff or cookie import.
 
 ### 2. Claude in Chrome
 
