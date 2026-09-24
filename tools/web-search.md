@@ -16,11 +16,6 @@ Used through `agents/web-search-researcher.md`.
 **Detect:** the `WebSearch` tool is listed. This is the default and the agent
 already uses it.
 
-### 2. Browser capability
-
-When WebSearch is unavailable but the browser capability is, the agent can
-search through the browser. Same sanitising rule.
-
 ## Fallback
 
 Pinned `none`: skip and record `Web search: skipped by project policy`.
