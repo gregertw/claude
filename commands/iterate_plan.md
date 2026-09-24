@@ -44,9 +44,7 @@ not confirmed", and list it under the command's undecided or deferred section.
 
 ### 1. Load context
 
-- If a plan path was provided as argument, read it fully
-- If the plan has not been implemented (its status is `proposed` or `active`), stop and tell the user to use `/update_plan` for changes to a plan that has not landed. A verification is not required to iterate
-- If not, list recent files in `thoughts/plans/` and ask which plan is being iterated
+- If a plan path was provided, read it; otherwise list recent files in `thoughts/plans/` and ask which plan. If its status is `proposed`, stop and point to `/update_plan`; if `active`, point to `/implement_plan`, which resumes it. A verification is not required to iterate
 - Read the plan document and, if the plan has a `verified:` link, that verification document
 - Check the verification's "Remaining Tasks" and "Issues Found" sections for known work items
 - Run `git diff --stat HEAD` to understand the current state of uncommitted changes
