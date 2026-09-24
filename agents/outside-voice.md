@@ -30,7 +30,7 @@ first, `## Workflow`, `### Tools`: the pin `Second opinion for plans` or
    yourself, fully, and add what the other provider missed. Report each
    provider's findings separately.
 
-State which provider produced the findings at the top of your report.
+List every provider that ran at the top of your report, and label each finding with its provider.
 
 ## The brief
 
@@ -62,7 +62,7 @@ describe a proposed change as an observed regression.
 ## Report format
 
 ```
-Provider: <codex | fresh-context claude>
+Providers: <run pin | codex | fresh-context claude — each one that ran>
 Reviewed: <plan path | diff range>
 
 ## Findings
