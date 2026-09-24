@@ -98,7 +98,7 @@ Walk through each item in the research doc's "Decisions Needed" section:
 - Record the decision and rationale
 - If a decision triggers new questions, research them before continuing
 
-Do NOT proceed to planning until all decisions are resolved.
+Move on to planning once every decision is resolved or explicitly deferred by the user (recorded under Decisions Deferred).
 
 ### 4. Design the implementation approach
 
@@ -245,11 +245,8 @@ name the outcome and the headline success measure it commits to.]
 
 ### Verification
 
-- The commands from the contract's `### Checks`; these are examples for a python code base:
-    - [ ] `poetry run pytest tests/path` passes
-    - [ ] `poetry run ruff check .` passes
-    - [ ] `poetry run pyright` passes
-    - [ ] [manual verification step if needed]
+- [ ] Run the contract's `### Checks` fast tier verbatim
+- [ ] [manual verification step if needed]
 
 ### Implementation Status: Not Started
 

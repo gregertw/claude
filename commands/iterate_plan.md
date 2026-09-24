@@ -44,9 +44,7 @@ not confirmed", and list it under the command's undecided or deferred section.
 
 ### 1. Load context
 
-- If a plan path was provided as argument, read it fully
-- If the plan has not been implemented (its status is `proposed` or `active`), stop and tell the user to use `/update_plan` for changes to a plan that has not landed. A verification is not required to iterate
-- If not, list recent files in `thoughts/plans/` and ask which plan is being iterated
+- If a plan path was provided, read it; otherwise list recent files in `thoughts/plans/` and ask which plan. If its status is `proposed`, stop and point to `/update_plan`; if `active`, point to `/implement_plan`, which resumes it. A verification is not required to iterate
 - Read the plan document and, if the plan has a `verified:` link, that verification document
 - Check the verification's "Remaining Tasks" and "Issues Found" sections for known work items
 - Run `git diff --stat HEAD` to understand the current state of uncommitted changes
@@ -117,14 +115,7 @@ If the change modifies a decision, phase behavior, or component contract:
 
 ### 5. Run verification after each logical group of changes
 
-After completing a coherent set of changes (e.g., all UX fixes, or all bug fixes), run the contract's `### Checks` fast tier, and the full tier before anything is committed, e.g. for a python code repository:
-
-```bash
-poetry run ruff check . --fix
-poetry run pyright
-poetry run pytest
-npm --prefix frontend run build
-```
+After completing a coherent set of changes (e.g., all UX fixes, or all bug fixes), run the contract's `### Checks` fast tier verbatim, and the full tier before anything is committed.
 
 Fix any failures before moving to the next group. For **UX refinements**, also
 exercise the changed screens with the **browser** capability
@@ -148,10 +139,7 @@ After all changes are complete, present to the user:
 - Phases affected: [list any]
 
 ### Verification Status
-- ruff: [pass/fail]
-- pyright: [pass/fail]
-- pytest: [pass/fail]
-- frontend build: [pass/fail]
+- [each command in the tier]: [pass/fail, counts]
 ```
 
 ## Guidelines

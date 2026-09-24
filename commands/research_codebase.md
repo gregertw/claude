@@ -211,10 +211,10 @@ Next: /create_plan thoughts/research/YYYY-MM-DD-slug.md
 
 ## Guidelines
 
-- **Focus on research and identifying key decisions** - do not make recommendations or ask the user to make decisions
+- **Identify decisions, don't make them** — lay out options with evidence; add a Recommendation only where the evidence clearly favours one, and leave the choice to `/create_plan`
 - **Be factual** - describe what IS, not what SHOULD be
 - **Include specific file paths and line numbers** for all claims
-- **Always include web research** for external context, best practices, and alternatives
+- **Include web research where the outside world bears on a question** (external docs, known issues, alternatives), unless `### Tools` pins `Web search: none`; then record those questions as open
 - **Lay out decisions clearly** - this document feeds into `/create_plan`
 - **When feature-driven, keep the outcome as the anchor** - the question is
   "what does the code mean for this outcome and hypothesis", not "what does the

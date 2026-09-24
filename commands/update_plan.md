@@ -46,7 +46,7 @@ not confirmed", and list it under the command's undecided or deferred section.
 - If a plan path was provided as argument, read it fully
 - If not, list recent files in `thoughts/plans/` and ask which to update
 - Read the full plan file and its referenced research document (if any)
-- This is to change a plan before it's implemented. If the plan shows implementation has started, stop and tell the user that /iterate_plan should be used to work on the implementation.
+- This command changes a plan before implementation. If its status is `active`, stop and point to `/implement_plan` (to resume) or ask whether to pause it; if `done`, point to `/iterate_plan`.
 
 ### 2. Gather new context
 
@@ -95,7 +95,7 @@ If the update introduces new open questions or invalidates previous decisions:
 - Ask the user to choose
 - Record the decision and rationale
 
-Do NOT proceed to updating the plan until all new decisions are resolved.
+Move on to updating the plan once every new decision is resolved or explicitly deferred by the user (recorded under Decisions Deferred).
 
 ### 5. Re-evaluate affected phases
 

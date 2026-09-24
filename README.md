@@ -237,7 +237,7 @@ capability so that the fallback is the agent itself.
 | --- | --- | --- |
 | `codebase-analyzer` | plan_feature, research_codebase, verify_implementation | Explains how a specific component works today, with `file:line` references. Documents, never suggests. |
 | `web-search-researcher` | research_codebase, fix_bug | Finds current information outside the codebase and returns sources with quotes and dates. The web-search capability. |
-| `browser-qa` | verify_implementation, iterate_plan, fix_bug | Exercises a running app in a real browser: console after every interaction, forms three ways, states, mobile width, the feature's paths end to end. Picks the browser provider per `tools/browser.md`, reports which one it used, and returns findings with severity and evidence. Never types credentials, never fixes. |
+| `browser-qa` | verify_implementation, iterate_plan, fix_bug | Exercises a running app in a real browser: console after every interaction, forms three ways, states, mobile width, the feature's paths end to end. Picks the browser provider per `tools/browser.md`, reports which one it used, and returns findings with severity and evidence. Types only the throwaway credentials the contract permits; never fixes. |
 | `outside-voice` | create_plan, update_plan, verify_implementation, fix_bug | The reviewer who was not in the room. Given a plan or a diff and the findings so far, it looks for what was missed. Runs a second model when one is installed, per `tools/second-opinion.md`, and is the fresh-context reviewer otherwise. Findings only, each with the line that motivates it. |
 
 The built-in `Explore` agent is used alongside these for broad read-only
