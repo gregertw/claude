@@ -87,7 +87,7 @@ For each phase marked as complete in the plan:
 - Run the phase-specific verification commands
 - Note any deviations (acceptable or concerning)
 
-Use **Explore** or **codebase-analyzer** sub-agents for parallel investigation when reviewing multiple independent areas.
+Use **Explore** or **codebase-analyzer** sub-agents to map what the changed code does; judge deviations and defects yourself against the plan.
 
 ### 4. Check the feature's success measures
 
