@@ -245,11 +245,8 @@ name the outcome and the headline success measure it commits to.]
 
 ### Verification
 
-- The commands from the contract's `### Checks`; these are examples for a python code base:
-    - [ ] `poetry run pytest tests/path` passes
-    - [ ] `poetry run ruff check .` passes
-    - [ ] `poetry run pyright` passes
-    - [ ] [manual verification step if needed]
+- [ ] Run the contract's `### Checks` fast tier verbatim
+- [ ] [manual verification step if needed]
 
 ### Implementation Status: Not Started
 

@@ -115,14 +115,7 @@ If the change modifies a decision, phase behavior, or component contract:
 
 ### 5. Run verification after each logical group of changes
 
-After completing a coherent set of changes (e.g., all UX fixes, or all bug fixes), run the contract's `### Checks` fast tier, and the full tier before anything is committed, e.g. for a python code repository:
-
-```bash
-poetry run ruff check . --fix
-poetry run pyright
-poetry run pytest
-npm --prefix frontend run build
-```
+After completing a coherent set of changes (e.g., all UX fixes, or all bug fixes), run the contract's `### Checks` fast tier verbatim, and the full tier before anything is committed.
 
 Fix any failures before moving to the next group. For **UX refinements**, also
 exercise the changed screens with the **browser** capability
@@ -146,10 +139,7 @@ After all changes are complete, present to the user:
 - Phases affected: [list any]
 
 ### Verification Status
-- ruff: [pass/fail]
-- pyright: [pass/fail]
-- pytest: [pass/fail]
-- frontend build: [pass/fail]
+- [each command in the tier]: [pass/fail, counts]
 ```
 
 ## Guidelines

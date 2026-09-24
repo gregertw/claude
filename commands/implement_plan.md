@@ -99,12 +99,7 @@ Should I continue with this adjustment?
 ```
 
 **After coding:**
-- Run the contract's `### Checks` **fast tier** (or the single tier when there is no split), honouring its preconditions. Example for a python repository:
-  ```
-  poetry run ruff check . --fix
-  poetry run pyright
-  poetry run pytest
-  ```
+- Run the contract's `### Checks` **fast tier** verbatim (or the single tier when there is no split), honouring its preconditions
 - Fix any failures before proceeding
 - Update the plan document:
   - Mark the phase: `Implementation Status: Complete`

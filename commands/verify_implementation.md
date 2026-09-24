@@ -66,12 +66,7 @@ not confirmed", and list it under the command's undecided or deferred section.
 
 ### 2. Run all automated checks
 
-Run the contract's `### Checks` **full tier** verbatim, including any preconditions it names. Example for a python repository:
-```
-poetry run ruff check .
-poetry run pyright
-poetry run pytest
-```
+Run the contract's `### Checks` **full tier** verbatim, including any preconditions it names.
 
 Record the results. If anything fails, note it but continue the review.
 
@@ -226,13 +221,11 @@ Save to `thoughts/verifications/YYYY-MM-DD-slug.md`:
 
 ## Automated Check Results
 
-For each check, specify the check, whether it passed or failed and details if fail. Examples for a python repository:
+For each check, specify the check, whether it passed or failed and details if fail:
 
 - **Browser QA:** [Ran, provider: X / N/A (no UI phases) / Skipped by project policy / Tool unavailable - findings, if any, by severity]
 - **Second opinion:** [provider: X / Skipped by project policy - findings, if any]
-- **Ruff:** [Pass/Fail - details if fail]
-- **Pyright:** [Pass/Fail - details if fail]
-- **Pytest:** [Pass/Fail - N passed, N failed, N skipped]
+- [each command in the tier]: [pass/fail, counts]
 
 ## Phase Verification
 
