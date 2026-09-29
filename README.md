@@ -1,12 +1,18 @@
 # Claude Configs
 
-> By [Greger Teigre Wedel](https://stuff.greger.io) inspired by works from https://> github.com/humanlayer/humanlayer and https://github.com/garrytan/gstack.
+> By [Greger Teigre Wedel](https://stuff.greger.io) inspired by works from https://
+> github.com/humanlayer/humanlayer and https://github.com/garrytan/gstack.
 
 ## Why another Claude workflow?
 
 There are very elaborate workflows and then there are workflows that rely on services outside Claude. There are very agentic workflows with lots of autonomy. And then there are workflows that make you spend tokens like crazy.
 
-And there is this workflow. It is built on principles of good product craft without being too opinionated. It stores all parts of the workflow in documents in the git repo so humans can inspect, correct, and interact with agents and each other. It builds on Claude's capabilities and can use your installed tools and preferences through simple configuration. 
+And there is this workflow. It is built on principles of good product craft without being too opinionated. It stores all parts of the workflow in documents in the git repo so humans can inspect, correct, and interact with agents and each other. It builds on Claude's capabilities and can use your installed tools and preferences through simple configuration, but there aren't any dependencies.
+
+This makes the workflow good to explore what works for you. It can be turned into an
+autonomous agent workflow (by reusing the prompts from the commands in agent
+instructions). And you don't even have to build code, you can use this workflow to
+build something else.
 
 You guide the workflow through slash commands and there are a few sub-agents and tools that support each workflow step. The output ends in the thoughts/ directory in your repo (yes, it makes sense to check it in). You can then review and inspect, before triggering the next step. More details on the workflow can be found below.
 
