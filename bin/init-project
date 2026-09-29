@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Set up the workflow in the current project. Idempotent: never overwrites a
+# file that exists, only reports what is missing.
+# Usage: bash ~/.claude/bin/init-project [project-root]
+set -euo pipefail
+HOME_CLAUDE="${CLAUDE_HOME:-$HOME/.claude}"
+T="$HOME_CLAUDE/templates"
+ROOT="${1:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+cd "$ROOT"
+echo "Project: $ROOT"
+
+# 1. thoughts/ layout
+if [ -f thoughts/README.md ]; then
+  echo "thoughts/README.md: exists (authoritative; commands read its table)"
+  for d in features research plans verifications reference todo; do
+    grep -q "\`$d/\`" thoughts/README.md || echo "  note: thoughts/README.md does not list $d/; the commands will ask before creating it"
+  done
+else
+  mkdir -p thoughts
+  cp "$T/thoughts-README.md" thoughts/README.md
+  echo "thoughts/README.md: created from template"
+fi
+for d in features research plans verifications reference todo; do
+  if grep -q "\`$d/\`" thoughts/README.md 2>/dev/null; then
+    mkdir -p "thoughts/$d"; [ -e "thoughts/$d/.gitkeep" ] || touch "thoughts/$d/.gitkeep"
+  fi
+done
+
+# 2. CLAUDE.md contract
+if [ -f CLAUDE.md ] && grep -q "^## Workflow" CLAUDE.md; then
+  echo "CLAUDE.md: has a '## Workflow' section (leaving it alone)"
+  for h in Checks App "Test account" Commits "CI policy" Tools Changelog Release Dependencies Thoughts; do
+    grep -q "^##* $h" CLAUDE.md || echo "  optional subsection not present: $h (template: $T/CLAUDE-workflow.md)"
+  done
+else
+  if [ -f CLAUDE.md ] && grep -qi "^##* .*workflow" CLAUDE.md; then
+    echo "CLAUDE.md: has a heading mentioning 'workflow' but no '## Workflow' section:"
+    grep -ni "^##* .*workflow" CLAUDE.md | sed 's/^/    line /'
+    echo "  appending the contract template; merge the existing section into it and delete the old one"
+  fi
+  [ -f CLAUDE.md ] && printf '\n' >> CLAUDE.md
+  cat "$T/CLAUDE-workflow.md" >> CLAUDE.md
+  echo "CLAUDE.md: appended the '## Workflow' contract template; fill in the placeholders"
+fi
+
+# 3. Per-command addenda directory
+mkdir -p .claude/workflow
+[ -f .claude/workflow/README.md ] || cp "$T/workflow-addendum-README.md" .claude/workflow/README.md
+echo ".claude/workflow/: ready for per-command addenda"
+
+# 4. Tools
+echo "Tools detected (pins in CLAUDE.md win):"
+bash "$HOME_CLAUDE/bin/detect-tools" | sed 's/^/  /'
+
+cat <<MSG
+
+Next steps:
+  1. Fill in the placeholders under '## Workflow' in CLAUDE.md (Checks and App first).
+  2. Commit thoughts/, CLAUDE.md and .claude/workflow/.
+  3. Start with /plan_feature for a new feature, /research_codebase for a question, /fix_bug for a bug.
+MSG

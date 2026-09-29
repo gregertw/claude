@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Prints one line per capability with the provider that will be used:
+# a pin from CLAUDE.md's 'Tools' heading (## or ###) if present, else the first
+# available provider. See tools/README.md for the accepted pin strings.
+set -u
+SK="${CLAUDE_HOME:-$HOME/.claude}/skills"
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+
+pin() { # pin "Browser QA" -> prints the pin value or nothing
+  [ -f "$ROOT/CLAUDE.md" ] || return 0
+  awk -v key="$1" '
+    /^##+ Tools/ {inside=1; next}
+    inside && /^##/ {inside=0}
+    inside && index($0, "- " key ":")==1 { sub("^- " key ": *", ""); print; exit }
+  ' "$ROOT/CLAUDE.md"
+}
+emit() { # emit VAR "Pin key" "detected"
+  local p; p=$(pin "$2")
+  if [ -n "$p" ]; then echo "$1=pinned:$p"; else echo "$1=$3"; fi
+}
+
+# browser
+B=""
+[ -x "$ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$ROOT/.claude/skills/gstack/browse/dist/browse"
+[ -z "$B" ] && [ -x "$SK/gstack/browse/dist/browse" ] && B="$SK/gstack/browse/dist/browse"
+if [ -n "$B" ]; then emit BROWSER "Browser QA" "gstack-browse:$B"
+else emit BROWSER "Browser QA" "check-mcp   # claude-in-chrome or playwright MCP tools if listed; else none"; fi
+
+# second opinion, plans and diffs
+if command -v codex >/dev/null 2>&1; then SO="codex"; else SO="fresh-context   # code-review skill for diffs if listed"; fi
+emit SECOND_OPINION_PLANS "Second opinion for plans" "$SO"
+emit SECOND_OPINION_DIFFS "Second opinion for diffs" "$SO"
+
+# scope lock
+if [ -f "$SK/gstack/freeze/bin/check-freeze.sh" ]; then emit SCOPE_LOCK "Scope lock" "gstack-freeze"
+else emit SCOPE_LOCK "Scope lock" "self-check"; fi
+
+# destructive guard
+if [ -f "$SK/gstack/careful/bin/check-careful.sh" ]; then emit DESTRUCTIVE_GUARD "Destructive guard" "gstack-careful"
+else emit DESTRUCTIVE_GUARD "Destructive guard" "self-check"; fi
+
+# diagram
+if [ -f "$SK/gstack/diagram/SKILL.md" ] || [ -f "$SK/diagram/SKILL.md" ]; then emit DIAGRAM "Diagrams" "gstack-diagram"
+else emit DIAGRAM "Diagrams" "mermaid-fence"; fi
+
+# web search
+emit WEB_SEARCH "Web search" "agent"

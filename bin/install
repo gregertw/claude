@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Install (or update) the workflow into ~/.claude from a checkout of this repo.
+# Usage: bash <checkout>/bin/install
+# Copies commands/, agents/, tools/, templates/, bin/ and README.md. Never touches
+# anything else in ~/.claude (settings, memory, other commands or agents).
+set -euo pipefail
+SRC="$(cd "$(dirname "$0")/.." && pwd)"
+DST="${CLAUDE_HOME:-$HOME/.claude}"
+if [ "$SRC" = "$DST" ]; then echo "Already installed in place at $DST"; exit 0; fi
+mkdir -p "$DST"
+for d in commands agents tools templates bin; do
+  mkdir -p "$DST/$d"
+  cp -R "$SRC/$d/." "$DST/$d/"
+done
+cp "$SRC/README.md" "$DST/WORKFLOW-README.md"
+chmod +x "$DST"/bin/* 2>/dev/null || true
+echo "Installed workflow into $DST:"
+echo "  commands: $(ls "$SRC/commands" | sed 's/\.md$//' | tr '\n' ' ')"
+echo "  agents:   $(ls "$SRC/agents" | sed 's/\.md$//' | tr '\n' ' ')"
+echo "  tools:    $(ls "$SRC/tools" | grep -v README | sed 's/\.md$//' | tr '\n' ' ')"
+echo "Next: in a project root, run: bash $DST/bin/init-project"

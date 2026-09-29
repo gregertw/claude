@@ -1,11 +1,17 @@
 # Ignore everything
 *
 
-# Except commands and agents
+# Except commands, agents, tools, and bin
 !commands/
 !commands/**
 !agents/
 !agents/**
+!tools/
+!tools/**
+!templates/
+!templates/**
+!bin/
+!bin/**
 
 # Keep these files
 !.gitignore
