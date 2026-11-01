@@ -93,8 +93,18 @@ When feature-driven, derive them from the feature document. Cover at least:
   screens, endpoints, or flows does it pass through, and what constrains it?
 - **Success Measures** — for each measure: can it be observed with the
   instrumentation, logging, or data that exists today? If not, what is missing?
+- **Documentation** — for each moving part: which pages of the project's
+  user-facing docs (the docs tree, README, example READMEs, guides, API and
+  protocol references, troubleshooting) state the behaviour it changes, and
+  which statements become false, which need a new section, and which are
+  already wrong against the code? Sweep the whole docs tree per item (grep
+  the names, config keys, routes, error codes and defaults it touches), not
+  only the pages the code happens to point at. Released-version migration
+  guides and changelogs are historical; list them only to say they stay.
 
-When question-driven, break the question into independent areas the same way.
+When question-driven, break the question into independent areas the same
+way, including the documentation question for anything that changes
+behaviour.
 
 For each question, decide how it gets answered:
 
@@ -175,6 +185,16 @@ which success measures are observable today.]
 
 ...
 
+## Documentation Impact
+
+### [Moving part 1]
+
+- `docs/path/page.rst:12-30` - [what it states today; false after the change /
+  needs a new section / already wrong against the code / stays]
+
+[One subsection per moving part. Say "none" explicitly when a sweep found no
+page, so the absence is a finding rather than an omission.]
+
 ## Decisions Needed
 
 ### Decision 1: [Question]
@@ -214,6 +234,10 @@ Next: /create_plan thoughts/research/YYYY-MM-DD-slug.md
 - **Identify decisions, don't make them** — lay out options with evidence; add a Recommendation only where the evidence clearly favours one, and leave the choice to `/create_plan`
 - **Be factual** - describe what IS, not what SHOULD be
 - **Include specific file paths and line numbers** for all claims
+- **Sweep the docs, not just the code** - every behaviour change gets a
+  documentation question in step 3 and a `## Documentation Impact` entry; a
+  page the code never points at (a guide's example output, a troubleshooting
+  entry, a protocol spec sentence) is exactly the one a code-led search misses
 - **Include web research where the outside world bears on a question** (external docs, known issues, alternatives), unless `### Tools` pins `Web search: none`; then record those questions as open
 - **Lay out decisions clearly** - this document feeds into `/create_plan`
 - **When feature-driven, keep the outcome as the anchor** - the question is
