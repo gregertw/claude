@@ -18,15 +18,8 @@ $ARGUMENTS - Optional: path to a feature document, path to a file with context, 
 
 ## Where documents live
 
-The layout of `thoughts/` is defined by the project's `thoughts/README.md`,
-which is authoritative; the default it starts from is
-`~/.claude/templates/thoughts-README.md`: `features/`, `research/`, `plans/`,
-`verifications/` (dated snapshots) and `reference/`, `todo/` (living). **A
-directory is a *kind* of document, never a *status*.** If this command needs a
-directory the project's README does not list, ask before creating it, and add
-the row to the README when the user agrees; when running autonomously, stop and
-report instead. Never move a document because its status changed, and never
-create a `completed/` directory.
+Layout and the dated/living rules: `~/.claude/shared/conventions.md`
+("Where documents live").
 
 Research goes in `thoughts/research/YYYY-MM-DD-slug.md`. The **date is the
 status**: a research document is a snapshot, true as of the day it was written,
@@ -48,25 +41,17 @@ invent one.
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/research_codebase.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/research_codebase.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Understand the question
 
 - If the argument is a path under `thoughts/features/`, read it fully. The
   research is now feature-driven: reuse the feature's slug, and treat its
-  Desired Outcome, User Experience, Success Measures, Hypothesis, and Open
-  Questions as the source of the research questions (step 3)
+  Desired Outcome, User Experience, Acceptance Criteria, Success Measures,
+  Hypothesis, and Open Questions as the source of the research questions (step 3)
 - If any other file path or a topic was provided, read it fully and begin research immediately
 - If no argument provided, ask: "What would you like me to research? Provide a
   feature document, a question, a topic, or a path to a file with context." If
@@ -78,6 +63,7 @@ not confirmed", and list it under the command's undecided or deferred section.
 - Read every referenced file FULLY (no limit/offset) before spawning sub-agents
 - This ensures complete context before decomposing the research
 - Read CLAUDE.md and identify any relevant code structure, instructions, or repo specifics that are relevant
+- Read the living spec for each capability the topic touches (`thoughts/specs/`, or the location the contract names), if one exists
 
 ### 3. Formulate the research questions
 
@@ -91,6 +77,14 @@ When feature-driven, derive them from the feature document. Cover at least:
   exist already, what would it touch, and what in the current code contradicts it?
 - **User Experience** — for each step of the main and edge paths: which existing
   screens, endpoints, or flows does it pass through, and what constrains it?
+- **Acceptance Criteria** — for each AC: which code path would deliver it,
+  and at what level can it be tested (unit, integration, browser), with which
+  existing fixtures, factories, or harness? An AC that no level can test is a
+  finding: the plan must either add the harness or name a manual check.
+- **Current spec** — for each capability touched: what does its living spec
+  say today, which statements would the hypothesis change, and where does the
+  code already disagree with the spec? (No spec yet: say so; the plan's Spec
+  Delta will start one.)
 - **Success Measures** — for each measure: can it be observed with the
   instrumentation, logging, or data that exists today? If not, what is missing?
 - **Documentation** — for each moving part: which pages of the project's
@@ -185,6 +179,15 @@ which success measures are observable today.]
 
 ...
 
+## Acceptance Criteria Testability
+
+(When feature-driven; omit otherwise.)
+
+| AC | Code path | Test level and harness |
+| --- | --- | --- |
+| AC-1 | `path/to/handler.py:40` → `path/to/store.py:88` | integration, existing `client` fixture |
+| AC-3 | ... | none today: [what is missing] |
+
 ## Documentation Impact
 
 ### [Moving part 1]
@@ -243,7 +246,7 @@ Next: /create_plan thoughts/research/YYYY-MM-DD-slug.md
 - **When feature-driven, keep the outcome as the anchor** - the question is
   "what does the code mean for this outcome and hypothesis", not "what does the
   code do". Do not let the research drift into describing the codebase for its own sake
-- **Do not edit the feature document** - it is a dated snapshot. A hypothesis the
+- **Do not edit the feature document or the spec** - the feature document is a dated snapshot, and the spec changes only through the commands that own it (a plan's Spec Delta, merged at verification, and after that iterations and bug fixes). A hypothesis the
   code contradicts becomes a finding here and a decision in the plan, not a rewrite there
 - **Write the questions before spawning agents** - an agent with a precise
   question returns evidence; one with a topic returns a tour

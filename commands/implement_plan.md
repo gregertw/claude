@@ -39,25 +39,24 @@ Things discovered while implementing:
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/implement_plan.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/implement_plan.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Load the plan
 
 - If a plan path was provided as argument, read it fully
 - If not, list recent files in `thoughts/plans/` and ask which to implement
 - Read the plan completely, noting any phases already marked as done
-- Read the referenced research document and all files mentioned in the plan
+- Read the referenced research document (if any; small-change-lane plans have none) and all files mentioned in the plan
+- **Approval gate.** A `proposed` plan needs an `approved:` line in its
+  frontmatter. Without one, show the user the plan's phases, the number of
+  acceptance criteria, and the Spec Delta in a few lines, and ask for approval;
+  on an explicit yes, write `approved: YYYY-MM-DD by <who>` and continue. When
+  running autonomously, stop and report that the plan awaits approval; never
+  approve it yourself. A plan already `active` (resuming) is treated as
+  approved.
 
 ### 2. Resume from current state
 
@@ -78,9 +77,22 @@ For each phase:
   (the per-phase marker — distinct from the plan-level frontmatter `status:`,
   which is `active` for the whole run)
 
+**Write the failing tests first:**
+- Write the phase's tests from its "New Tests" list, starting with the ones the
+  Traceability table names for the phase's acceptance criteria
+- Run them and confirm each **fails, and fails on the behaviour**: an assertion
+  about the missing result, not an import error, a typo, or a fixture problem.
+  A test that passes before the change proves nothing about it; fix the test,
+  or tell the user the behaviour already exists and ask how to proceed
+- Set those rows' Status in the Traceability table to `Failing (red)`
+- Exceptions, each noted under the phase: a pure refactor (the existing tests
+  must pass before and after, and that is the evidence); an AC the plan covers
+  only with a manual check (it is checked after coding instead)
+
 **Implement the changes:**
-- Make the code changes specified in the plan
-- Write new tests as specified
+- Make the code changes specified in the plan, until the phase's tests pass
+- Do not weaken a red test to make it pass. If the AC itself turns out wrong,
+  that is a plan mismatch: stop, as below
 - If a phase fails for a non-obvious reason (unexpected test failure, behaviour
   that contradicts the plan's assumptions), do not patch around it. Find the
   root cause first (trace the path, check `git log` on the affected files,
@@ -103,8 +115,12 @@ Should I continue with this adjustment?
 - Fix any failures before proceeding
 - Update the plan document:
   - Mark the phase: `Implementation Status: Complete`
+  - Set its rows in the Traceability table to `Passing` (manual checks: done,
+    with what was observed)
   - Add notes about any deviations or learnings under the phase
   - If a decision changed during implementation, update "Decisions Made"
+  - If behaviour changed from what the plan said, update the Acceptance
+    Criteria and Spec Delta to match (never renumber; strike through and add)
 
 ### 4. Between phases
 
@@ -144,6 +160,9 @@ After completing each phase:
 - **Stop and ask** when something doesn't match the plan significantly
 - **Run all checks** (e.g. ruff, pyright, pytest or similar) after each phase, not just tests
 - **Read files fully** before modifying them
+- **Red before green** - every AC test is seen failing on the behaviour before
+  the code that makes it pass is written
+- **No approval, no start** - and never write `approved:` on the user's behalf
 - **Commit-worthy phases** - each completed phase should be in a state worthy of committing
 - **Park deferred work in `thoughts/todo/`, don't leave it implied by an
   unfinished phase** - the plan closes, the todo survives

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Install (or update) the workflow into ~/.claude from a checkout of this repo.
 # Usage: bash <checkout>/bin/install
-# Copies commands/, agents/, tools/, templates/, bin/ and README.md. Never touches
+# Copies commands/, agents/, tools/, templates/, shared/, bin/ and README.md. Never touches
 # anything else in ~/.claude (settings, memory, other commands or agents).
 set -euo pipefail
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 DST="${CLAUDE_HOME:-$HOME/.claude}"
 if [ "$SRC" = "$DST" ]; then echo "Already installed in place at $DST"; exit 0; fi
 mkdir -p "$DST"
-for d in commands agents tools templates bin; do
+for d in commands agents tools templates shared bin; do
   mkdir -p "$DST/$d"
   cp -R "$SRC/$d/." "$DST/$d/"
 done

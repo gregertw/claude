@@ -15,15 +15,8 @@ $ARGUMENTS - Optional: a description of the feature idea, or a path to a file wi
 
 ## Where documents live
 
-The layout of `thoughts/` is defined by the project's `thoughts/README.md`,
-which is authoritative; the default it starts from is
-`~/.claude/templates/thoughts-README.md`: `features/`, `research/`, `plans/`,
-`verifications/` (dated snapshots) and `reference/`, `todo/` (living). **A
-directory is a *kind* of document, never a *status*.** If this command needs a
-directory the project's README does not list, ask before creating it, and add
-the row to the README when the user agrees; when running autonomously, stop and
-report instead. Never move a document because its status changed, and never
-create a `completed/` directory.
+Layout and the dated/living rules: `~/.claude/shared/conventions.md`
+("Where documents live").
 
 Feature documents go in `thoughts/features/YYYY-MM-DD-slug.md`. The **date is
 the status**: a feature document is a snapshot of what we wanted and why, true
@@ -41,28 +34,25 @@ outcome, not the implementation (`offline-sync`, not `sqlite-queue`).
 
 Feature documents carry **no `status:` frontmatter** — only plans do.
 
+The feature document is a snapshot. What the capability does *now* lives in
+its living spec (`thoughts/specs/<capability>.md`), which `/verify_implementation`
+updates when a plan lands.
+
 ## Process
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/plan_feature.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/plan_feature.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Capture the idea
 
 - If a description or file path was provided as argument, read it fully and use it as the starting point
 - If nothing was provided, ask: "What feature do you have in mind? Describe it in a few sentences — who it is for and what it should make possible."
 - Read `CLAUDE.md` and `README.md` (or equivalent product docs) **only** to pick up product vocabulary, the names of user roles, and existing success metrics. Do not open source files.
+- Read the living spec for each capability the idea touches (`thoughts/specs/`, or the location the contract's `### Thoughts` names). Specs describe behaviour, not code, so they are in bounds: this feature is a change to what they say, and the Acceptance Criteria below should read as edits to them.
 - If `thoughts/features/` already has a document on the same topic, read it and ask whether this supersedes it or is a different feature
 
 ### 2. Work through the feature with the user, one topic at a time
@@ -82,12 +72,13 @@ fill it in.
 3. **Desired outcome** — When this feature exists, what is different for those users? State it as an observable change in their world, not as a capability of the software ("a driver can finish the day without re-entering any stop", not "add offline support"). Then bracket the ambition in two questions:
    - **The 10x version.** What is the version of this that would make the user think "they really thought of everything"? Describe it concretely, from the user's side.
    - **The smallest version.** What is the smallest thing that still delivers the outcome? Not a demo, the real outcome.
-   The gap between the two answers is the raw material for Not in scope (topic 7). Decide with the user where this round lands.
+   The gap between the two answers is the raw material for Not in scope (topic 8). Decide with the user where this round lands.
 4. **User experience** — Walk through the experience as a short narrative from the user's point of view: what they see, what they do, what happens, where it ends. Cover the main path and the one or two most likely awkward paths (nothing to show, action fails, user changes their mind).
-5. **Success measures** — What would we look at, after shipping, to know whether it worked? Prefer measures that already exist or can be observed cheaply. For each measure, note how it would actually be observed (a log line, a metric, a support ticket count, a manual check). If the honest answer is "we would not know", write that down — it is a research question.
-6. **Hypothesis** — Sketch two or three ways it could work, at the level of moving parts and where the data flows, not classes and files. One must be the minimal version (fewest moving parts), one the ideal version (what we would build with no constraints), and optionally one lateral version (a different framing of the problem). Give a one-line recommendation and ask the user to pick. The chosen one becomes the Hypothesis; the rejected ones are recorded in one line each with the reason. Label all of it as untested: it is what research will confirm, correct, or replace.
-7. **Not in scope** — What adjacent things are we deliberately not doing in this round? Start from the gap between the 10x and smallest versions in topic 3. Every item gets a one-line reason; a deferral without a reason is a guess.
-8. **Open questions** — What do we need to find out before we can plan this? Separate what needs the codebase from what needs the outside world (users, the web, a vendor). These become the research questions for `/research_codebase`.
+5. **Acceptance criteria** — Turn the experience into pass/fail statements, in the format of `~/.claude/shared/conventions.md` ("Acceptance criteria"): at least one per main-path step that changes behaviour and one per edge path, each observable from outside the code, one behaviour each. Read them back to the user as a list and ask what is missing or wrong; a missing AC is the cheapest bug you will ever fix. Where the user cannot say what should happen, that is an Open Question, not an AC.
+6. **Success measures** — What would we look at, after shipping, to know whether it worked? Prefer measures that already exist or can be observed cheaply. For each measure, note how it would actually be observed (a log line, a metric, a support ticket count, a manual check). If the honest answer is "we would not know", write that down — it is a research question.
+7. **Hypothesis** — Sketch two or three ways it could work, at the level of moving parts and where the data flows, not classes and files. One must be the minimal version (fewest moving parts), one the ideal version (what we would build with no constraints), and optionally one lateral version (a different framing of the problem). Give a one-line recommendation and ask the user to pick. The chosen one becomes the Hypothesis; the rejected ones are recorded in one line each with the reason. Label all of it as untested: it is what research will confirm, correct, or replace.
+8. **Not in scope** — What adjacent things are we deliberately not doing in this round? Start from the gap between the 10x and smallest versions in topic 3. Every item gets a one-line reason; a deferral without a reason is a guess.
+9. **Open questions** — What do we need to find out before we can plan this? Separate what needs the codebase from what needs the outside world (users, the web, a vendor). These become the research questions for `/research_codebase`.
 
 Push back gently when an answer is an implementation ("use a background job") where an outcome or experience is wanted. Record the implementation idea under Hypothesis and ask again for the outcome.
 
@@ -134,6 +125,13 @@ Save to `thoughts/features/YYYY-MM-DD-slug.md`. If the project's
 - **[Situation]** — [what the user experiences]
 - **[Situation]** — [what the user experiences]
 
+## Acceptance Criteria
+
+- **AC-1** (main path, step [n]) — When [trigger], [observable result].
+- **AC-2** (edge: [situation]) — When [trigger], [observable result].
+
+[Pass/fail before shipping. Success Measures below tell whether the outcome happened.]
+
 ## Success Measures
 
 | Measure | Target | How we observe it |
@@ -175,8 +173,8 @@ point "Next" at the step that is actually missing rather than at
 `/research_codebase`.
 
 
-Show the user the document path and a six-line summary: the outcome, the
-primary user, the headline success measure, the hypothesis in one sentence, the
+Show the user the document path and a seven-line summary: the outcome, the
+primary user, the number of acceptance criteria, the headline success measure, the hypothesis in one sentence, the
 number of open questions, and anything the user was asked and declined to
 decide ("Undecided: none" when there is nothing). Then point to the next step:
 
@@ -191,6 +189,7 @@ Next: /research_codebase thoughts/features/YYYY-MM-DD-slug.md
 - **Do not make any code changes**
 - **Outcome over capability** — every section should be readable by someone who has never seen the code. If a sentence only makes sense to a developer, rewrite it from the user's side.
 - **Concrete user experience** — a narrative someone could act out beats a list of requirements
+- **Every behaviour-changing UX step has an acceptance criterion** — the plan maps each AC to a test, so an AC missing here is a test missing later
 - **Every success measure says how it is observed** — a measure nobody can observe is an open question, not a measure
 - **Label the hypothesis as a hypothesis** — research and planning are allowed to replace it, and the document should make that easy
 - **Open Questions is the contract with `/research_codebase`** — write questions that can be answered, not themes

@@ -18,34 +18,30 @@ vocabulary (`proposed` | `active` | `done` | `superseded`).
   reopening its status — flipping it back to `active` would misreport what's in
   flight.
 - **If iteration turns into substantial new work**, that's a new plan via
-  `/create_plan`, not an ever-growing Iterations section.
+  `/create_plan`, not an ever-growing iterations log.
 - **Never move the plan file** and never create a `completed/` directory — a
   directory is a *kind* of document, never a *status*. The verification links to
   the plan by path; a move rots that link silently.
 - **Findings you're not fixing now** go to `thoughts/todo/<slug>.md` (undated,
   living, deleted when the work lands), not into a phase left open.
+- **Iterations go in the plan's iterations log**, a sibling file
+  (`thoughts/plans/YYYY-MM-DD-slug.iterations.md`, format in
+  `~/.claude/shared/conventions.md`), linked from the plan's `iterations:`
+  frontmatter. The plan itself stays the design, readable in one sitting.
 
 ## Process
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/iterate_plan.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/iterate_plan.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Load context
 
 - If a plan path was provided, read it; otherwise list recent files in `thoughts/plans/` and ask which plan. If its status is `proposed`, stop and point to `/update_plan`; if `active`, point to `/implement_plan`, which resumes it. A verification is not required to iterate
-- Read the plan document and, if the plan has a `verified:` link, that verification document
+- Read the plan document, its iterations log if it has one, and, if the plan has a `verified:` link, that verification document
 - Check the verification's "Remaining Tasks" and "Issues Found" sections for known work items
 - Run `git diff --stat HEAD` to understand the current state of uncommitted changes
 
@@ -76,33 +72,38 @@ For each change:
 **Make the change:**
 - For **Bug fixes**, follow `/fix_bug` (root cause confirmed before any change,
   minimal diff, regression test that fails before and passes after; it writes
-  its own record in `thoughts/research/` and the Iterations entry below);
+  its own record in `thoughts/research/` and the iterations log entry below);
   for the other categories, implement the fix/refinement directly
 - Run relevant tests to verify
 
-**After each change, immediately update the plan document:**
+**After each change, immediately append to the iterations log:**
 
-Add or update the **Iterations** section in the plan. If the section doesn't exist, add it after "Implementation Summary" with this structure. Each batch opens with one line of context saying what it followed: the implementation, or a verification of a given date.
+- Create `thoughts/plans/YYYY-MM-DD-slug.iterations.md` on the first entry
+  (the plan's date and slug), and add `iterations:` to the plan's frontmatter.
+  A plan with an older in-plan `## Iterations` section keeps it, gets a
+  one-line pointer to the log under it, and new entries go to the log
+- Each batch opens with a dated heading saying what it followed: the
+  implementation (with commit), or a verification (with its path)
+- One entry per change, one to three lines, numbered continuously across
+  batches:
 
 ```markdown
-## Iterations
-
-### YYYY-MM-DD, after implementation (commit `XXXXXX`)
-<!-- or: ### YYYY-MM-DD, after verification thoughts/verifications/YYYY-MM-DD-slug.md -->
-
-#### N. [Short title describing the change]
-
-**Category**: [Bug fix | UX refinement | Decision changed | New functionality | Verification fix]
-
-**What changed**: [Specific description of the change]
-
-**Files affected**:
-- `path/to/file.tsx` — [what changed in this file]
-
-**Rationale**: [Why this change was needed — what wasn't working, what was discovered]
+1. **[Category] Short title** — what changed (`path/a.py`, `path/b.tsx`). Why: [one line]. AC: [AC-n added / changed / none]. Spec: [updated / delta amended / none].
 ```
 
-If the section already exists, append a new dated batch; number entries continuously across batches.
+Categories: Bug fix, UX refinement, Decision changed, New functionality,
+Verification fix.
+
+**Behaviour changes carry their AC and spec with them.** A Decision changed,
+New functionality, or UX refinement that changes what a user can observe:
+
+- adds or changes an acceptance criterion in the plan (new ones continue the
+  numbering and say `(added in iteration N)`), with a test, seen failing
+  first as in `/implement_plan`, and a row in the Traceability table
+- updates the spec: without `spec_merged:` on the plan, amend its Spec Delta;
+  with it, edit the living spec directly, citing the iterations entry, and set
+  its `**Last changed:**` (rules in `~/.claude/shared/conventions.md`,
+  "Living specs")
 
 ### 4. Update related plan sections
 
@@ -134,7 +135,9 @@ After all changes are complete, present to the user:
 2. [Change title] — [one-line description]
 
 ### Plan Updated
-- Iterations section: [N new entries, following implementation / verification of YYYY-MM-DD]
+- Iterations log: [N new entries, following implementation / verification of YYYY-MM-DD]
+- Acceptance criteria: [added / changed, or none]
+- Spec: [delta amended / spec updated / none]
 - Decisions updated: [list any]
 - Phases affected: [list any]
 
@@ -144,12 +147,13 @@ After all changes are complete, present to the user:
 
 ## Guidelines
 
-- **Update the plan after EVERY change, not at the end** — this is the whole point. The plan document should always reflect reality.
+- **Log after EVERY change, not at the end** — this is the whole point. The plan, its log, and the spec should always reflect reality.
 - **Small, focused changes** — each iteration item should be independently testable and documentable. Don't batch unrelated changes.
-- **Preserve the plan's structure** — add to the Iterations section, don't reorganize existing phases.
+- **Preserve the plan's structure** — iterations go to the log; the plan body changes only where a decision, AC, or the Spec Delta changed.
+- **A behaviour change without an AC is invisible to the next verification** — add the AC and its test.
 - **Re-verify when it matters** — after fixing verification issues or changing behaviour, run `/verify_implementation` again; it writes a new dated document and moves the plan's `verified:` link.
 - **Track decisions explicitly** — if you're changing how something works vs what the plan specified, that's a decision change. Document why.
 - **Track bugs explicitly** — if you find and fix a bug during iteration, document what the bug was and how it was fixed, not just the fix.
 - **Be specific about files** — always list which files were modified and what changed in each.
-- **Don't over-document** — a bug fix that changes one line doesn't need a paragraph. Match documentation depth to change significance.
+- **Don't over-document** — an entry is one to three lines; the investigation record (for bugs) or the commit carries the rest.
 - **Run tests frequently** — don't accumulate 10 changes before running tests. Test after each coherent group.
