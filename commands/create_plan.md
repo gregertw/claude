@@ -2,87 +2,57 @@
 
 Take a research document, interact with the user to resolve decisions, and produce an actionable implementation plan. Evaluate the plan from multiple perspectives before finalizing.
 
-## Where documents live
+## Documents and plan state
 
-The layout of `thoughts/` is defined by the project's `thoughts/README.md`,
-which is authoritative; the default it starts from is
-`~/.claude/templates/thoughts-README.md`: `features/`, `research/`, `plans/`,
-`verifications/` (dated snapshots) and `reference/`, `todo/` (living). **A
-directory is a *kind* of document, never a *status*.** If this command needs a
-directory the project's README does not list, ask before creating it, and add
-the row to the README when the user agrees; when running autonomously, stop and
-report instead. Never move a document because its status changed, and never
-create a `completed/` directory.
+Layout, slugs, plan frontmatter (`status`, `approved`, `verified`,
+`iterations`), acceptance criteria, traceability and living specs are defined in
+`~/.claude/shared/conventions.md`. What this command owns:
 
-- **Dated** (`YYYY-MM-DD-slug.md`) means *snapshot*: true as of that date, not
-  edited afterwards except to correct an error.
-- **Undated** (`slug.md`) means *living*: edited in place, deleted when it stops
-  being true.
-- **Reuse the slug** across feature → research → plan → verification. Same slug
-  = same thread of work; the dates differ, the slug shouldn't.
-- **Never move a document because its status changed**, and never create a
-  `completed/` directory. A finished plan stays in `thoughts/plans/` — moving it
-  rots every link that verifications and research wrote to it.
-
-## Plan status: frontmatter, closed vocabulary
-
-Every plan opens with YAML frontmatter. `status` is required and must be one of
-four values; nothing else is a valid status:
-
-```yaml
----
-status: proposed | active | done | superseded
-verified: thoughts/verifications/YYYY-MM-DD-slug.md   # when status: done
-superseded_by: thoughts/plans/YYYY-MM-DD-slug.md      # when status: superseded
----
-```
-
-- **proposed** — written, not agreed. Nobody is working on it.
-- **active** — being implemented right now.
-- **done** — implemented. Link the verification.
-- **superseded** — overtaken. Link the replacement; keep the file, because
-  knowing what we decided *not* to do is worth as much as knowing what we did.
-
-`grep -l "^status: active" thoughts/plans/*.md` has to answer "what is in
-flight" truthfully — that is the whole point of putting status in frontmatter.
-So a new plan is **`proposed`**, even when the user has agreed to it in
-principle: it becomes `active` only when implementation actually starts.
-
-Only plans carry `status:`. Research and verification documents don't — they are
-dated snapshots and their date is their status.
-
-Note the two levels: the frontmatter `status:` describes the **whole plan**, while
-each phase carries its own `Implementation Status:` line (`Not Started` /
-`In Progress` / `Complete`) in the body. They are different fields; don't collapse
-them.
+- A new plan is **`proposed`**, even when the user has agreed in principle; it
+  becomes `active` only when `/implement_plan` starts it.
+- **`approved:`** is written only when the user explicitly approves the
+  finished plan (step 8). Never infer it, and never write it when running
+  autonomously.
+- The plan reuses the research document's slug; in the small-change lane it
+  mints one that names the outcome.
 
 ## Process
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/create_plan.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/create_plan.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Load context
 
 - If a research doc path was provided as argument, read it fully
 - If not, list recent files in `thoughts/research/` and ask which to use
 - If no research doc exists, suggest running `/research_codebase` first (and
-  `/plan_feature` before that, if this is a new feature with no feature document)
+  `/plan_feature` before that, if this is a new feature with no feature
+  document), unless the change qualifies for the **small-change lane** below
 - If the research document has a `**Feature:**` line, read that feature document
   fully too: its Desired Outcome and Success Measures are what the plan must
-  deliver, and its Not In Scope list seeds "What We're NOT Doing"
+  deliver, its User Experience and Acceptance Criteria are what the phases must
+  cover, and its Not In Scope list seeds "What We're NOT Doing"
 - Read all files referenced in the research document
+- Read the living spec for every capability the plan touches
+  (`thoughts/specs/`, or the location the contract names). The plan's Spec
+  Delta is written against it. A `draft` spec's statements are claims to
+  check against the code, not facts. A capability with no spec: offer
+  `/create_spec <capability>` first, so the delta has a baseline; if the user
+  declines, the delta's statements will start a `partial` spec at merge
+
+**Small-change lane.** When the argument is a description rather than a
+research document, and the change is one phase, about five files or fewer, and
+adds no data model, migration, auth or permission rule, or external
+integration, propose the small-change lane and let the user confirm it. In the
+lane: no research document; the plan writes its own acceptance criteria (step
+4); step 6 runs Pass 1 and Pass 3 but not the evaluator team; and the plan says
+`**Lane:** small change` under its header. Everything else applies: decisions,
+acceptance criteria, traceability, spec delta, approval. If the work grows past
+the lane while planning, say so and stop for research.
 
 ### 2. Ask for additional context
 
@@ -92,7 +62,8 @@ not confirmed", and list it under the command's undecided or deferred section.
 
 ### 3. Resolve open decisions
 
-Walk through each item in the research doc's "Decisions Needed" section:
+Walk through each item in the research doc's "Decisions Needed" section (in
+the small-change lane: the decisions the description leaves open):
 - Present the options with their trade-offs
 - Ask the user to choose
 - Record the decision and rationale
@@ -102,13 +73,21 @@ Move on to planning once every decision is resolved or explicitly deferred by th
 
 ### 4. Design the implementation approach
 
-Present a phased outline to the user BEFORE writing details:
+Settle the acceptance criteria first. Start from the feature document's list
+(or write one with the user when there is none, in the format of
+`~/.claude/shared/conventions.md`). Decisions made in step 3 may add, change or
+drop criteria: added ones continue the numbering and say `(added in plan:
+reason)`; dropped ones stay, struck through, with the reason. Every UX path in
+the feature document must be covered by at least one AC.
+
+Then present a phased outline to the user BEFORE writing details, with the
+criteria each phase delivers:
 
 ```
 ## Proposed phases:
-1. [Phase name] - [what it accomplishes]
-2. [Phase name] - [what it accomplishes]
-3. [Phase name] - [what it accomplishes]
+1. [Phase name] - [what it accomplishes] - AC-1, AC-2
+2. [Phase name] - [what it accomplishes] - AC-3
+3. [Phase name] - [enabling work, no AC: why it is needed]
 
 Does this phasing make sense?
 ```
@@ -118,7 +97,7 @@ Get feedback and adjust before writing the draft.
 ### 5. Write the draft plan
 
 Save to `thoughts/plans/YYYY-MM-DD-slug.md` with `status: proposed`, reusing the
-research document's slug and using the format in step 7. Leave "Evaluation
+research document's slug (or the minted one in the small-change lane) and using the format in step 7. Leave "Evaluation
 Notes", "Decisions Deferred", "What Already Exists", and each phase's "Failure
 Scenarios" empty for now; step 6 fills them. The draft exists as a file so that
 the evaluators review the actual text, not a summary.
@@ -142,6 +121,18 @@ codebase.
   and silent is a critical gap: add it to the plan.
 - **Rationale.** Every item under "What We're NOT Doing" gets a one-line reason.
   A deferral without a reason is a guess.
+- **Coverage.** Every AC appears in the Traceability table with a phase and a
+  named test (`path::test_name`), or a named manual check with the reason no
+  automated test is possible. Every UX path of the feature document maps to at
+  least one AC. An AC without a test is a critical gap: add the test to the
+  phase.
+- **Spec delta.** Every behaviour the plan adds, changes or removes appears in
+  the Spec Delta against the current spec's wording, and every decision that
+  users or later plans must respect is listed there too.
+- **Size.** The plan describes behaviour, files and interfaces, not code. Code
+  blocks only for schemas, signatures and wire formats. Over roughly 600 lines
+  before Evaluation Notes, look for a phase that is really its own plan, or
+  detail that belongs in research.
 
 **Pass 2: evaluator team**
 
@@ -156,6 +147,8 @@ codebase and returns specific concerns:
   what transforms it, where it goes, what can go wrong at each step) and check
   each branch against the tests that exist and the tests the plan adds. If the
   plan fixes a defect, a regression test is a required item, not a suggestion.
+  For each AC, would the named test actually fail if the behaviour were
+  missing? A test that only exercises the code path is not coverage.
   Flag duplication of existing code, missing error and edge handling, and
   anything over- or under-engineered for the outcome.
 
@@ -193,13 +186,15 @@ Update `thoughts/plans/YYYY-MM-DD-slug.md` to this format:
 ```markdown
 ---
 status: proposed
+# approved: YYYY-MM-DD by <who>   (added in step 8, only on explicit approval)
 ---
 
 # Implementation Plan: [Feature Name]
 
 **Date:** YYYY-MM-DD
 **Feature:** thoughts/features/YYYY-MM-DD-slug.md   (when there is one; omit otherwise)
-**Research:** thoughts/research/YYYY-MM-DD-slug.md
+**Research:** thoughts/research/YYYY-MM-DD-slug.md   (omit in the small-change lane)
+**Lane:** small change   (only in that lane)
 **Branch:** [current branch]
 
 ## Overview
@@ -227,6 +222,29 @@ name the outcome and the headline success measure it commits to.]
 
 - `path/to/existing.py` - [what it already solves, and whether the plan reuses it]
 
+## Acceptance Criteria
+
+- **AC-1** (main path, step 1) — When [trigger], [observable result].
+- **AC-2** (edge: [situation]) — When [trigger], [observable result].
+- **AC-5** (added in plan: [decision that introduced it]) — ...
+- ~~**AC-4**~~ — dropped: [reason]
+
+## Traceability
+
+| AC | Phase | Test | Status |
+| --- | --- | --- | --- |
+| AC-1 | 1 | `tests/path/test_x.py::test_name` | Not run |
+| AC-2 | 2 | manual: [browser walk, step] — [why no automated test] | Not run |
+
+## Spec Delta
+
+### `thoughts/specs/[capability].md`   (new spec: say so)
+
+- **ADDED** ([Area]) — When [trigger], [observable result]. (AC-1)   (ID assigned at merge)
+- **MODIFIED SHR-4** — "[current wording]" → "[new wording]". (AC-2)
+- **REMOVED SHR-7** — "[current wording]" — [why]
+- **DECISION** — [decision users or later plans must respect, one line]
+
 ## Phase 1: [Descriptive Name]
 
 ### Changes
@@ -234,10 +252,10 @@ name the outcome and the headline success measure it commits to.]
 - `path/to/file.py` - [what changes and why]
 - `path/to/other.py` - [what changes and why]
 
-### New Tests, both unit and integration tests
+### New Tests (written first: `/implement_plan` sees them fail before coding)
 
-- [Test description and what it verifies]
-- [Another test]
+- `tests/path/test_x.py::test_name` — AC-1: [what it asserts]
+- `tests/path/test_y.py::test_other` — failure scenario: [what it guards]
 
 ### Failure Scenarios
 
@@ -260,26 +278,14 @@ name the outcome and the headline success measure it commits to.]
 
 ## Evaluation Notes
 
-### Architecture
-[Key feedback and how it was addressed]
+**Outside voice:** [provider, or fresh-context reviewer]
 
-### Security
-[Key feedback and how it was addressed]
+| # | From | Finding (`file:line` quoted) | Disposition |
+| --- | --- | --- | --- |
+| 1 | Security | `api/share.py:42` "…" — [concern] | Folded into Phase 2 / User decided: [choice] / Rejected: [why] |
 
-### Scalability
-[Key feedback and how it was addressed]
-
-### Usability
-[Key feedback and how it was addressed]
-
-### Tests and code quality
-[Key feedback and how it was addressed]
-
-### Outside voice
-[What the fresh-context review found, and what was done about it]
-
-### Unverified notes
-[Concerns that could not cite a line, kept for the implementer's awareness]
+**Unverified notes** (concerns that could not cite a line):
+- [note]
 ```
 
 **Diagrams.** A phase with a non-trivial data flow, state machine, or
@@ -288,7 +294,15 @@ pipeline gets a diagram in the plan, using the **diagram** capability
 
 ### 8. Present for approval
 
-Show the user the plan location and a summary. Ask if they want to adjust anything before implementation.
+Show the user the plan location and a summary: phases, the number of
+acceptance criteria and any covered only by a manual check, the specs the
+delta touches, and anything deferred. Ask whether to adjust anything, or
+whether they approve it for implementation.
+
+On an explicit approval, add `approved: YYYY-MM-DD by <who>` to the
+frontmatter and leave `status: proposed`. "Looks good" to a question about
+one section is not approval of the plan; ask. When running autonomously, never
+write `approved:`; report that the plan awaits approval.
 
 ## Guidelines
 
@@ -309,3 +323,9 @@ Show the user the plan location and a summary. Ask if they want to adjust anythi
   motivating line is a note, not a finding
 - **Separate automated verification** (commands to run) from manual verification
 - **Keep phases small** - prefer more small phases over fewer large ones
+- **Every AC has a test before the plan is approved** - traceability is decided
+  here, not discovered at verification
+- **Behaviour, not code** - a reviewer should be able to approve the plan
+  without reading code blocks; keep them to schemas, signatures and wire formats
+- **The plan never edits a spec** - it carries a Spec Delta, which
+  `/verify_implementation` merges when the plan lands

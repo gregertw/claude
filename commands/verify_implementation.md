@@ -24,6 +24,10 @@ Two things this command owns on the plan side:
 - **Write the back-link.** When the verification confirms the plan landed, set
   the plan's frontmatter to `status: done` and add
   `verified: thoughts/verifications/YYYY-MM-DD-slug.md`.
+- **Merge the Spec Delta.** When a whole-plan verification has no open High
+  issue, merge the plan's Spec Delta into the living specs and write
+  `spec_merged: YYYY-MM-DD` to the plan (step 7). That is what makes the spec
+  say what the code now does.
 - **Only link what you actually verified.** `verified:` asserts that *this plan*
   was verified. If the verification covers a subset — two follow-up items, one
   phase of six — say so in the document and leave the plan at bare
@@ -38,29 +42,22 @@ The `**Plan:**` path you write below is exactly the link a move would rot.
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/verify_implementation.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/verify_implementation.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Gather context
 
 - If a plan path was provided as argument, read it fully
 - If not, list recent files in `thoughts/plans/` and ask which to verify
-- Read the referenced research document
+- Read the referenced research document, if there is one (small-change-lane plans have none)
 - If the plan or research has a `**Feature:**` line, read that feature document
   fully: its Desired Outcome, User Experience, and Success Measures are what the
   implementation is ultimately measured against
-- Read the plan, noting which phases are marked complete, and its Iterations
-  section if it has one
+- Read the plan, noting which phases are marked complete, its Acceptance
+  Criteria, Traceability and Spec Delta, and its iterations log (the
+  `iterations:` frontmatter link, or an older in-plan Iterations section)
 - If the plan already has a `verified:` link, read that verification: this run
   must report the fate of every issue it found (fixed, still open, accepted)
 
@@ -83,6 +80,25 @@ For each phase marked as complete in the plan:
 - Note any deviations (acceptable or concerning)
 
 Use **Explore** or **codebase-analyzer** sub-agents to map what the changed code does; judge deviations and defects yourself against the plan.
+
+### 3.5. Check the acceptance criteria
+
+This step runs for every plan with an Acceptance Criteria section. For each
+row of the Traceability table, and each AC added by an iteration:
+
+- **The test exists** where the table says, under that name. Cite `file:line`.
+- **It asserts the AC's observable result**, not just that the code path runs.
+  Read the assertion and quote it. A test that would still pass with the
+  behaviour removed is not coverage: the AC is uncovered.
+- **It passed** in step 2's run.
+- **A manual check** is walked here (in the browser, step 4.5, for UI), and
+  the result is recorded.
+- **Struck-through ACs** have a reason, and nothing in the code still claims
+  the dropped behaviour.
+
+An uncovered AC is an issue of the same severity as the behaviour being
+broken, because nothing would notice if it were. Also look the other way: a
+behaviour the diff adds that no AC describes is a scope finding (step 5).
 
 ### 4. Check the feature's success measures
 
@@ -215,7 +231,7 @@ Save to `thoughts/verifications/YYYY-MM-DD-slug.md`:
 **Date:** YYYY-MM-DD
 **Feature:** thoughts/features/YYYY-MM-DD-slug.md   (when there is one; omit otherwise)
 **Plan:** thoughts/plans/YYYY-MM-DD-slug.md
-**Research:** thoughts/research/YYYY-MM-DD-slug.md
+**Research:** thoughts/research/YYYY-MM-DD-slug.md   (omit when the plan has none)
 **Branch:** [current branch]
 **Commit:** [current short hash]
 
@@ -244,6 +260,14 @@ For each check, specify the check, whether it passed or failed and details if fa
 
 ...
 
+## Acceptance Criteria
+
+| AC | Test | Asserts the behaviour? | Result |
+| --- | --- | --- | --- |
+| AC-1 | `tests/test_x.py:88` `test_name` - `assert resp.json()["shared_with"] == [...]` | Yes | Pass |
+| AC-3 | manual: browser, edge path "upload fails" | n/a | Pass - [what was seen] |
+| AC-4 | none | - | Uncovered (issue below) |
+
 ## Success Measures
 
 (Omit when there is no feature document.)
@@ -262,10 +286,11 @@ For each check, specify the check, whether it passed or failed and details if fa
 (Omit on a first run.)
 
 **Previous:** thoughts/verifications/YYYY-MM-DD-slug.md
+**Iterations since:** [entries N-M of the iterations log]
 
 | Issue then | Status now | Evidence |
 | --- | --- | --- |
-| [Issue 1 from the previous run] | Fixed / Still open / Accepted as-is | `file.py:123` or the Iterations entry |
+| [Issue 1 from the previous run] | Fixed / Still open / Accepted as-is | `file.py:123` or the iterations log entry |
 
 ## Remaining Tasks
 
@@ -279,6 +304,11 @@ For each check, specify the check, whether it passed or failed and details if fa
 **Description:** [What's wrong]
 **Location:** `file.py:line`
 **Recommendation:** [How to fix]
+
+## Spec Merge
+
+- `thoughts/specs/[capability].md` - [merged: N added, N modified, N removed /
+  created (partial) / not merged: why]
 
 ## Overall Assessment
 
@@ -294,6 +324,33 @@ to tell? What needs attention before merging?]
   the one that counts) — unless the verification only covers a subset of the
   plan, in which case leave `verified:` as it was and say why in the document
 - Leave the plan file where it is
+- **Merge the Spec Delta** when you write `verified:` and no High issue is
+  open (a subset verification, or one with an open High issue, does not
+  merge; say so under Spec Merge, and a later verification merges). A plan
+  with no Spec Delta section merges nothing; say so. For each spec file in the
+  delta:
+  - apply ADDED statements under their area with the next free ID,
+    MODIFIED and REMOVED by ID (a removed ID is retired, never reused), and
+    DECISION lines to Decisions in force; tag each changed statement
+    `[plan]`, plus `[test]` with the test name when an AC's test asserts it,
+    and cite the plan; update the Untested list
+  - also apply what the iterations log changed (Decision changed, New
+    functionality, behaviour-changing UX refinements) that the delta does not
+    yet say
+  - set `**Last changed:**` to today and the plan
+  - a spec that does not exist yet is created from the delta alone with
+    `**Status:** partial (covers: behaviour changed since YYYY-MM-DD)`, and a
+    row in `thoughts/specs/README.md`; `/create_spec` can complete it later
+  - merging does not change a spec's `draft` / `reviewed` status: the merged
+    statements were reviewed with the plan
+  - when the plan already has `spec_merged:`, the delta is in; check only that
+    the spec matches what the iterations since then changed, and fix the spec
+    where it does not
+  - write `spec_merged: YYYY-MM-DD` to the plan's frontmatter on the first
+    merge
+  Record what was merged under Spec Merge in the document. The spec is the one
+  living document this command edits; it is a record of what was verified,
+  not a fix
 - Anything in "Remaining Tasks" that nobody is picking up now belongs in
   `thoughts/todo/<slug>.md`, following any rule the contract's `### Thoughts`
   states for that directory, so the plan can close instead of lingering
@@ -319,5 +376,8 @@ observable.
 - **A measure nobody can observe is an issue** - the feature document promised
   a way to know whether this worked; if the implementation didn't provide it,
   say so with the same severity as a missing test
+- **An AC without a test that would fail is uncovered** - say so, whatever
+  the suite's pass count
+- **The spec follows verified code** - merge only with `verified:` and no open High issue, and mark it with `spec_merged:`
 - **Never mark a post-ship measure as met** - record the baseline and leave the
   verdict for after release

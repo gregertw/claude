@@ -17,8 +17,15 @@ Pick a slug that names the symptom (`checkout-double-charge`, not
 `fix-payment-service`). No `status:` frontmatter; only plans carry one.
 
 If the bug is in something an implemented plan delivered, also append an entry
-to that plan's "Iterations" section, in the format `/iterate_plan` uses, with **Category**: Bug fix and a link to the research
-document. The plan stays `done`.
+to that plan's iterations log (`~/.claude/shared/conventions.md`, "Iterations
+log"), category Bug fix, linking the research document. The plan stays `done`.
+
+If the bug shows the expected behaviour was never written down (no acceptance
+criterion, no spec statement), the fix also adds it: an AC in the plan with the
+regression test as its test (`added in iteration N`), and the statement in the
+living spec (directly when the plan has `spec_merged:`, in its Spec Delta
+otherwise). If the spec stated the behaviour and the code broke it, the spec is
+already right; cite the statement in the record.
 
 Work you find but are not fixing now goes to `thoughts/todo/<slug>.md`, following
 any rule the contract's `### Thoughts` states for that directory.
@@ -27,18 +34,10 @@ any rule the contract's `### Thoughts` states for that directory.
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/fix_bug.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/fix_bug.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Collect the symptom
 
@@ -176,6 +175,10 @@ Save to `thoughts/research/YYYY-MM-DD-slug.md`:
 - Scope lock: [provider, and the directory]
 - Fresh reproduction: [how it was re-run, and the result]
 
+## Spec
+
+- [`thoughts/specs/x.md`: "statement the code broke" / statement added / none (internal behaviour)]
+
 ## Related
 
 - [Prior bugs in the same area, todo items, architectural notes. "Recurring in this module: consider ..." when the history says so.]
@@ -189,8 +192,8 @@ DONE_WITH_CONCERNS: fixed but not fully verifiable (intermittent, needs staging)
 BLOCKED: cause unclear after investigation; say what was tried and what is needed.]
 ```
 
-Then, if the bug belongs to an implemented plan, append the Iterations entry
-described above.
+Then, if the bug belongs to an implemented plan, append the iterations log
+entry and any AC and spec statement described above.
 
 ### 8. Present the result
 

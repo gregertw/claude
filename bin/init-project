@@ -12,7 +12,7 @@ echo "Project: $ROOT"
 # 1. thoughts/ layout
 if [ -f thoughts/README.md ]; then
   echo "thoughts/README.md: exists (authoritative; commands read its table)"
-  for d in features research plans verifications reference todo; do
+  for d in features research plans verifications specs reference todo; do
     grep -q "\`$d/\`" thoughts/README.md || echo "  note: thoughts/README.md does not list $d/; the commands will ask before creating it"
   done
 else
@@ -20,7 +20,7 @@ else
   cp "$T/thoughts-README.md" thoughts/README.md
   echo "thoughts/README.md: created from template"
 fi
-for d in features research plans verifications reference todo; do
+for d in features research plans verifications specs reference todo; do
   if grep -q "\`$d/\`" thoughts/README.md 2>/dev/null; then
     mkdir -p "thoughts/$d"; [ -e "thoughts/$d/.gitkeep" ] || touch "thoughts/$d/.gitkeep"
   fi

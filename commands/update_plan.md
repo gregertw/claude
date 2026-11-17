@@ -22,24 +22,21 @@ plans that haven't been implemented, so:
   directory is a *kind* of document, never a *status*. Moving a plan rots the
   links that research and verifications wrote to it.
 
+**Approval.** A substantive change (a new or changed decision, a phase
+added, removed or reshaped, an acceptance criterion added, changed or dropped,
+or a Spec Delta change) removes the `approved:` line, and step 7 asks for
+approval again. Wording fixes and added file references keep it.
+
 Only plans carry `status:`. Research and verification documents don't.
 
 ## Process
 
 ### 0. Project conventions
 
-Before anything else, read the project's `CLAUDE.md` `## Workflow` section and,
-if it exists, `.claude/workflow/update_plan.md`. They override the defaults in this
-command: the checks to run (fast and full tiers, and the preconditions and
-warnings listed with them, which are instructions), how the app starts, the CI
-policy, tool pins, any rule under `### Thoughts` about writing there, and any
-rule the project adds. If neither exists, proceed on this command's own
-defaults, mention once that `bash ~/.claude/bin/init-project` sets the project
-up, and do not invent project facts (check commands, hosts, credentials): ask
-for them or leave them as open items. When running autonomously with no user
-to ask, do not block:
-derive what you can from the documents, mark every such decision "deduced,
-not confirmed", and list it under the command's undecided or deferred section.
+Read `~/.claude/shared/conventions.md` and follow its Project conventions
+section; this command's addendum is `.claude/workflow/update_plan.md`. The rest of
+that file defines the document layout, plan frontmatter, acceptance
+criteria, living specs and the iterations log this command refers to.
 
 ### 1. Identify the plan to update
 
@@ -66,6 +63,9 @@ For each piece of new information, determine:
 - Do any completed phases need rework?
 - Are new phases needed?
 - Do any decisions need to be revisited?
+- Which acceptance criteria are added, changed, or dropped, and does every
+  changed AC still have a test in the Traceability table?
+- Which Spec Delta statements change?
 - Are there new conflicts or open questions?
 
 Present a summary of the impact to the user:
@@ -79,6 +79,9 @@ Present a summary of the impact to the user:
 
 ### New Decisions Needed
 - [Decision question]
+
+### Acceptance Criteria
+- Added: AC-n [...]; Changed: AC-m [...]; Dropped: AC-k [reason]
 
 ### Phases Unaffected
 - Phase X, Phase Y (no changes needed)
@@ -148,14 +151,20 @@ Modify the existing plan file in place. Preserve the original structure and:
 
 - Update **Decisions Deferred** and **What Already Exists** if the change touched them
 
+- Update **Acceptance Criteria**, **Traceability** and **Spec Delta**: new ACs
+  continue the numbering, dropped ones are struck through with the reason,
+  never renumber; every AC keeps a phase and a test
+
+- If the change was substantive (see "Approval" above), remove `approved:`
+
 - Update affected phases:
   - Modify existing phase content as needed
   - Add new phases if required
   - If a phase needs to be removed, move it to a "Removed Phases" section with rationale rather than deleting it
   - Update **Implementation Status** on each phase to reflect current state
 
-- Update **Evaluation Notes** with any new evaluation feedback, including the
-  "Tests and code quality", "Outside voice", and "Unverified notes" subsections
+- Add new evaluation findings as rows in the **Evaluation Notes** table, and
+  any unverified notes under it
 
 ### 7. Present changes
 
@@ -178,7 +187,9 @@ Show the user a concise summary of what was changed:
 - [What should happen next]
 ```
 
-Ask if they want to adjust anything.
+Ask if they want to adjust anything. If `approved:` was removed, ask for
+approval of the updated plan and, on an explicit yes, write
+`approved: YYYY-MM-DD by <who>` again (never when running autonomously).
 
 ## Guidelines
 

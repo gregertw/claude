@@ -12,7 +12,10 @@
 !templates/**
 !bin/
 !bin/**
+!shared/
+!shared/**
 
 # Keep these files
 !.gitignore
 !README.md
+!CHANGELOG.md

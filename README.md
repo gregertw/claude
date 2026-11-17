@@ -27,7 +27,7 @@ git clone https://github.com/gregertw/claude.git /tmp/claude-workflow
 bash /tmp/claude-workflow/bin/install
 ```
 
-This copies `commands/`, `agents/`, `tools/`, `templates/` and `bin/` into
+This copies `commands/`, `agents/`, `tools/`, `templates/`, `shared/` and `bin/` into
 `~/.claude`, plus this README as `~/.claude/WORKFLOW-README.md`, and touches
 nothing else there. Re-run it to update. (If
 `~/.claude` is empty you can clone straight into it instead; the repo's
@@ -92,7 +92,8 @@ flowchart TB
   U["/update_plan<br/>(substantial change before work starts)"]
   I["/implement_plan<br/>(updates the plan as it goes)"]
   V["/verify_implementation<br/>→ thoughts/verifications/"]
-  IT["/iterate_plan<br/>(refinements, recorded in the plan;<br/>loops with verification)"]
+  IT["/iterate_plan<br/>(refinements, recorded in the iterations log;<br/>loops with verification)"]
+  CS["/create_spec<br/>→ thoughts/specs/"]
   B["/fix_bug<br/>→ thoughts/research/"]
   S["/changelog → /commit → /release"]
 
@@ -101,6 +102,8 @@ flowchart TB
   I --> V
   IT <--> V
   P -. new facts .-> U -.-> I
+  CS -. baseline .-> P
+  V -. merges Spec Delta .-> CS
   IT -. a bug .-> B
   V -. clean .-> S
 ```
@@ -109,18 +112,21 @@ flowchart TB
 thoughts/features/2026-09-17-offline-sync.md      what we want, and how we will know
 thoughts/research/2026-09-19-offline-sync.md      what the code and the world say about it
 thoughts/plans/2026-09-20-offline-sync.md         what we will do, in phases
+thoughts/plans/2026-09-20-offline-sync.iterations.md  what changed after implementation
 thoughts/verifications/2026-09-28-offline-sync.md what actually landed
+thoughts/specs/sync.md                            how sync behaves today (living)
 ```
 
-1. **Feature definition: `/plan_feature`.** It's not mandatory, you can go sraight
+1. **Feature definition: `/plan_feature`.** It's not mandatory, you can go straight
    to `/research_codebase`. But this step happens before anyone looks at the
    code, on purpose. Starting in the codebase anchors the thinking on what
    exists; this step anchors it on the users. It is a conversation, one topic
    at a time: who has the problem and what it costs them, a premise check (is
    this the right problem, what if we do nothing), the outcome as an
    observable change in the user's world, the 10x version and the smallest
-   version that still delivers, the user experience as a narrative, success
-   measures with how each is observed, two or three hypotheses with one
+   version that still delivers, the user experience as a narrative, numbered
+   acceptance criteria (pass/fail, one per behaviour-changing step and edge
+   path), success measures with how each is observed, two or three hypotheses with one
    chosen, what is out of scope and why, and the open questions that research
    must answer. It mints the slug used in document naming.
 2. **Research: `/research_codebase`.** Takes the feature document or your
@@ -135,33 +141,55 @@ thoughts/verifications/2026-09-28-offline-sync.md what actually landed
    five missed. Every concern must quote the line that motivates it. The plan
    lists what already exists and is reused, one realistic production failure
    per new codepath, and the reason behind every item that is out of scope.
+   It maps every acceptance criterion to a phase and a named test, and carries a
+   Spec Delta: what the change adds, modifies or removes in the living spec.
+   The plan is approved explicitly (an `approved:` date) before it is built.
    `/update_plan` is for when new facts change a plan that has not started;
-   it re-runs the same evaluation on the changed phases.
+   it re-runs the same evaluation on the changed phases, and a substantive
+   change needs a new approval. Small changes (one phase, a handful of files,
+   no data model, auth or integration) can take a lighter lane straight from a
+   description: no research document and no evaluator team.
 4. **Implementation: `/implement_plan`, then `/iterate_plan`.** Phase by
-   phase, all checks green after each phase, the plan updated as it goes so it
+   phase, tests first (each acceptance test is seen failing on the behaviour
+   before the code is written), all checks green after each phase, the plan updated as it goes so it
    always reflects reality. Agents can take separate phases. `/iterate_plan`
    is for the refinements that follow your own look at the result, or a
    verification's findings: wording, flow, small missing pieces, bugs. Each
-   batch is recorded in the plan's Iterations section, so the plan stays the
-   single record of what was built.
+   change is a short entry in the plan's sibling iterations log, and a change
+   in behaviour brings its acceptance criterion, its test and its spec
+   statement with it.
 5. **Verification: `/verify_implementation`.** Treat it the way you would
    review a junior's work: assume something was missed. It reads the actual
    code against the plan, runs every check itself, exercises any UI in a real
-   browser, checks that every success measure from the feature document can
+   browser, checks that every acceptance criterion has a test that would fail
+   without the behaviour, checks that every success measure from the feature document can
    actually be observed, hunts for defects with a named checklist and an
    adversarial second opinion, and writes a verification document. Iterate and
    verify form a loop: run it again after fixes, and each run is a new dated
    document that reports the fate of the previous run's findings. The latest
-   clean verification closes the plan, linked from the plan's frontmatter.
+   clean verification closes the plan, linked from the plan's frontmatter,
+   and merges the plan's Spec Delta into the living spec, so the spec always
+   says what the verified code does.
 
-Two side entries:
+Three side entries:
+
+- **Specs: `/create_spec`.** Builds living specs in an existing repository,
+  one capability at a time, when work needs them. With no argument it proposes
+  the capability map and writes the index. With a capability it gathers
+  behaviour from tests, docs, plans and code, drafts the spec with the source
+  of every statement, and reviews with you every discrepancy between sources
+  and every behaviour only the code shows, so today's bugs do not become
+  requirements. `/create_plan` offers it when a plan touches a capability with
+  no spec.
 
 - **Bugs: `/fix_bug`.** Root cause before any change: reproduce, trace, bisect
   when it worked before, write a testable hypothesis, confirm it with
   instrumentation, then fix with the smallest diff and a regression test that
   fails before and passes after. The investigation is a dated record in
   `thoughts/research/`, and if the bug belongs to an implemented plan it is
-  also logged there.
+  also logged in that plan's iterations log. When the bug shows the expected
+  behaviour was never written down, the fix adds the acceptance criterion and
+  the spec statement too.
 - **Shipping: `/changelog`, `/commit`, `/release`.** The changelog is
   written from the branch diff, the commit refuses to run until the changelog
   covers the changes, and the release command decides the version, bumps and
@@ -171,7 +199,7 @@ Two side entries:
 
 ### Where documents live
 
-Six directories under `thoughts/`. A directory is a *kind* of document, never
+Seven directories under `thoughts/`. A directory is a *kind* of document, never
 a *status*; nothing moves when it is finished.
 
 | Directory | Holds | Dated? |
@@ -180,14 +208,19 @@ a *status*; nothing moves when it is finished.
 | `research/` | What we found out, including bug investigations | yes |
 | `plans/` | What we intend to do | yes |
 | `verifications/` | Evidence a plan landed | yes |
+| `specs/` | How each capability behaves today | no |
 | `reference/` | Durable knowledge: protocol flows, runbooks | no |
 | `todo/` | Known work not yet scheduled | no |
 
-Dated files are snapshots and are not edited afterwards. Undated files are
+Dated files are snapshots and are not edited afterwards; `specs/` holds the
+current truth, updated through each plan's Spec Delta. Undated files are
 living and are edited in place, then deleted when they stop being true. Only
 plans carry a `status:` in their frontmatter, from a closed vocabulary of
 `proposed`, `active`, `done`, `superseded`, so that a grep for `active` always
-answers "what is in flight" truthfully.
+answers "what is in flight" truthfully. An `approved:` date records your
+go-ahead, and `/implement_plan` does not start a plan without it. A plan's
+refinements go to a sibling `*.iterations.md` log. The full rules are in
+`shared/conventions.md`.
 
 ### Tools
 
@@ -216,8 +249,9 @@ customization is therefore something the commands **read from the project**:
   (throwaway credentials the browser agent may type, or `none`),
   `### Commits` (attribution lines kept or stripped), `### CI policy` (what
   triggers CI, who re-triggers, the local pre-PR gate), `### Tools` (pins),
-  `### Changelog`, `### Release`, `### Dependencies`, `### Thoughts` (layout
-  plus any rule for writing there). The template is
+  `### Changelog`, `### Release`, `### Dependencies`, `### Thoughts` (layout,
+  where the user-facing docs and the living specs live, and any rule for
+  writing there). The template is
   `templates/CLAUDE-workflow.md`.
 - **Tool pins** under `### Tools`: `use <provider>`, `run <project script>`,
   or `none`. The accepted strings are tabled in `tools/README.md`.
@@ -268,8 +302,10 @@ searches.
 - **commands/** - The slash commands, one per step of the process
 - **agents/** - Sub-agent definitions: two research agents, two adapter agents
 - **tools/** - Capability contracts: which installed tools a command may use, how to detect them, and the fallback
+- **shared/** - `conventions.md`: the rules every command reads at its first step (project conventions, layout, plan frontmatter, acceptance criteria, living specs, iterations log)
 - **templates/** - The `## Workflow` contract for `CLAUDE.md`, the `thoughts/README.md`, and the addenda README that `init-project` installs
 - **bin/** - `install`, `init-project`, `detect-tools`
+- **CHANGELOG.md** - What changed in the workflow, and when
 
 ## License
 

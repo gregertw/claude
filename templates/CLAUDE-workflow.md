@@ -106,5 +106,7 @@ copy one to the left margin to activate it):
 
 ### Thoughts
 
-- Layout: `thoughts/README.md` is authoritative. Default: `features/`, `research/`, `plans/`, `verifications/`, `reference/`, `todo/`.
+- Layout: `thoughts/README.md` is authoritative. Default: `features/`, `research/`, `plans/`, `verifications/`, `specs/`, `reference/`, `todo/`.
+- User-facing docs: [where the project's user documentation lives, e.g. `docs/`, `site/content/`, or none]. Commands read it as a source and sweep it for impact; it is never a spec.
+- Living specs: `thoughts/specs/<capability>.md`, for developers and maintainers. User-facing docs are a source for specs, never a substitute. [Name another maintainer-facing location here only if the project keeps specs elsewhere.]
 - [Additional directories or rules the commands must follow when they write here, e.g. "`todo/` has an `INDEX.md`: add a row when adding a todo, remove it with the file", or "`inbound/` holds untriaged external reports"]
