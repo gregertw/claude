@@ -1,11 +1,14 @@
 # Changelog
 
 All notable changes to this workflow are recorded here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The repository has no
-version numbers yet, so earlier entries are grouped by the date they landed;
-`/release` promotes `[Unreleased]` to a versioned section when one is cut.
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Releases use
+calendar versions (`vYYYY.MM.DD`, with `.N` appended for a second release the
+same day). Changes from before the first release are grouped by the date they
+landed.
 
 ## [Unreleased]
+
+## [v2026.11.17] - 2026-11-17
 
 ### Added
 
